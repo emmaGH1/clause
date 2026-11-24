@@ -1,0 +1,56 @@
+evidence: '0.1'
+test: you-are-a-careful-reader-helping-a-worri-f9e3ff7e
+status: passed
+duration_ms: 76844
+external_id:
+  session_id: dedaf981-dd84-4637-956f-113492503f27
+  commit_id: dedaf981-dd84-4637-956f-113492503f27
+  test_id: 48fa4cd1-4b17-4911-9bf9-9c6797c5d01e
+  testcase_id: 01M87R2HPMNM3EM02SMABCMYQW
+  project_id: 01M0H65XR6FT1JJA8SX5PXCGVT
+  folder_id: 01M0H65ZG9FPAJ595J0WHQ5C7N
+  org_id: '3283488'
+  user_name: emma080355
+  user_email: emma080355@gmail.com
+  sharable_link: https://test-manager.lambdatest.com/projects/01M0H65XR6FT1JJA8SX5PXCGVT/test-cases/01M87R2HPMNM3EM02SMABCMYQW/dashboard/share/US_KI3WQ239S6GC7KTPEDUTKGO7SSN12QK09EI1B8BD5CP2XCFH74ETQ8JCRDX4K4CW?type=summary&agentView=true&fqdn=summary-page
+  execution_id: 36fae954-edb8-451e-8741-581e6cc4c36f
+environment:
+  model: v16-alpha
+  os: Linux
+  browser: Chrome
+  browser_version: '154'
+  resolution: 1920x1080
+  platform: Desktop
+  platform_type: web
+  os_version: 6.18.60-instabox
+steps:
+  - id: 0-1
+    ordinal: 1
+    status: passed
+    kind: navigate
+    duration_ms: 0
+    action_id: e151feba-bb7e-439c-a11c-0b099631b873
+  - id: 0-2
+    ordinal: 2
+    status: passed
+    kind: click
+    duration_ms: 8600
+    action_id: 003828a2-156d-4172-8381-76df47996b5e
+  - id: 0-3
+    ordinal: 3
+    status: passed
+    kind: scroll
+    duration_ms: 5500
+    action_id: aa23d7f1-418e-417c-a677-74c3f66249aa
+  - id: 0-4
+    ordinal: 4
+    status: passed
+    kind: click
+    duration_ms: 1000
+    action_id: f594dff6-a12f-491c-8ca9-9c7b9e296f1e
+  - id: 0-5
+    ordinal: 5
+    status: passed
+    kind: analyze
+    duration_ms: 17500
+    action_id: d013c91a-8d4c-4d38-8129-c50167e04d49

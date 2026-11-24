@@ -1,0 +1,30 @@
+{
+  "session_id": "dedaf981-dd84-4637-956f-113492503f27",
+  "started_at": "2026-11-24T21:41:00.035Z",
+  "ended_at": "2026-11-24T21:42:26.493Z",
+  "model": "v16-alpha",
+  "environment": "prod",
+  "profile": "default",
+  "plan": "free",
+  "status": "complete",
+  "outcome": "passed",
+  "total_runs": 1,
+  "test_id": "48fa4cd1-4b17-4911-9bf9-9c6797c5d01e",
+  "testcase_id": "01M87R2HPMNM3EM02SMABCMYQW",
+  "commit_id": "dedaf981-dd84-4637-956f-113492503f27",
+  "project_id": null,
+  "upload_status": "pending",
+  "upload_attempts": 0,
+  "last_upload_attempt": null,
+  "upload_error": null,
+  "runs": [
+    {
+      "index": 0,
+      "objective": "You are a careful reader helping a worried family member. Starting from this investment company's homepage, find what the website itself says about withdrawing money, including any withdrawal fees or conditions. Only read and navigate public pages; do NOT fill in, submit or click into any account, sign-up, login or deposit form. Store the exact sentence(s) the site uses about withdrawal fees as 'withdrawal_text', and the URL of the page where you found it as 'source_url'.",
+      "status": "passed",
+      "summary": "You asked to find the investment company’s public information about withdrawing money, including fees or conditions.\nThe public FAQ page was reviewed without accessing any account, sign-up, login, or deposit forms.\nThe site states: “The Company reserves the right to charge a withdrawal fee depending on the circumstances. You can find all the relevant information in the General Fees document. Please review it carefully.”\nThe withdrawal-fee information was found on the company’s FAQ page.",
+      "run_dir": "/data/home/.testmuai/kaneai/sessions/dedaf981-dd84-4637-956f-113492503f27/runs/0"
+    }
+  ],
+  "credits_consumed": 23.33838
+}

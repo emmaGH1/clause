@@ -1,0 +1,12 @@
+{
+  "_note": "Regulator notices, fetched and quoted by hand from the regulator's own page. Attributed by name, date and jurisdiction; never paraphrased into a claim about the site.",
+  "modmount": {
+    "entity": "ModMount Services Limited",
+    "hosts": ["mod-mountltd.com", "www.mod-mountltd.com", "modmountltd.com", "www.modmountltd.com"],
+    "regulator": "Securities and Exchange Commission, Nigeria",
+    "date": "2026-01-19",
+    "url": "https://home.sec.gov.ng/for-investors/keep-track-of-circulars/suspected-fraudulent-activities-of-modmount-services-limited/",
+    "quote": "The Commission hereby informs the public that ModMount Services Limited is not registered or licensed by the Commission to either solicit investments from the public or operate in any capacity within the Nigerian capital market.",
+    "also": "The Commission has also received information indicating complaints of withdrawal difficulties, aggressive solicitation practices, and other conducts inconsistent with fair market practices."
+  }
+}

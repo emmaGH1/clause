@@ -1,0 +1,16 @@
+{
+  "kind": "click",
+  "status": "passed",
+  "summary": "click: Clicking Help Center to find withdrawal information",
+  "duration_ms": 8604.0,
+  "url": "https://www.mod-mountltd.com/en/",
+  "action_id": "003828a2-156d-4172-8381-76df47996b5e",
+  "element_rect": {
+    "x": 1306,
+    "y": 148,
+    "width": 82,
+    "height": 24
+  },
+  "ordinal": 2,
+  "id": "0-2"
+}
