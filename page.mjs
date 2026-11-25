@@ -106,9 +106,10 @@ function readingQuote(quote) {
 }
 
 function ticker(steps = []) {
-  const events = steps.filter(Boolean);
+  const events = steps.filter(Boolean).slice(-3);
   return `<div class="ticker">
-    <ol data-steps aria-label="Latest Kane steps">${events.slice(-3).map((step) => `<li>${stepMarkup(step)}</li>`).join("")}</ol>
+    <ol data-steps data-snapshot="${escape(JSON.stringify(events))}" aria-label="Latest Kane steps">${events.map((step) => `<li>${stepMarkup(step)}</li>`).join("")}</ol>
+    <p class="ticker-wait">Waiting for the first step…</p>
     <p class="screen-reader" data-step-announcement aria-live="polite"></p>
   </div>`;
 }
@@ -134,10 +135,10 @@ export function reading(c, lead, bounds) {
           <a class="capture-link" href="${shotUrl(c, lead)}" target="_blank" rel="noopener">${bounds ? "Open full capture" : "Full capture · quote position unavailable"} <span aria-hidden="true">↗</span></a>`
           : complete ? `<p>${c.sentences?.length ? NOT_FOUND : copy.empty}</p>` : ""}
         ${source ? `<p class="reading-source">${escape(defang(source))}</p>` : ""}
-        ${complete ? `<a class="button primary" href="/case/${c.id}"><span aria-hidden="true">[</span> Read the report <span aria-hidden="true">→ ]</span></a>` : `<p class="reading-status" role="status"><span aria-hidden="true">▍</span> ${copy[c.stage]}</p>`}
+        ${complete ? `<a class="button primary" href="/case/${c.id}"><span aria-hidden="true">[</span> Read the report <span aria-hidden="true">→ ]</span></a>`
+          : `<h2 class="reading-steps-heading">Live Kane steps</h2>${ticker(c.kaneProgress)}`}
       </div>
     </div>
-    ${complete ? "" : ticker(c.kaneProgress)}
   </section>`, { mode: "reading", refresh: !complete });
 }
 

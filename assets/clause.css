@@ -303,7 +303,7 @@ button { cursor: pointer; }
   letter-spacing: -.025em;
   text-wrap: pretty;
 }
-.reading-status { color: var(--apricot); font-size: clamp(1.05rem, 2vw, 1.45rem); font-weight: 600; }
+.reading-steps-heading { color: var(--apricot); font-size: clamp(1.05rem, 2vw, 1.45rem); }
 .capture-link { font-size: .9rem; }
 .ticker:has(li) {
   margin-block-start: 1.6rem;
@@ -321,6 +321,11 @@ button { cursor: pointer; }
 .ticker li span { color: var(--orchid); font-weight: 600; }
 .ticker li span::before { content: "› "; }
 .ticker li:last-child { color: var(--linen); }
+.ticker li:last-child span { color: var(--apricot); }
+.ticker-wait { margin-top: .5rem; color: var(--muted); }
+.ticker:has(li) .ticker-wait { display: none; }
+.reading-detail .ticker:has(li) { margin-top: 0; }
+.reading-detail .ticker ol { font-size: clamp(.95rem, 1.3vw, 1.13rem); }
 
 @media (max-width: 760px) {
   .reading-heading { padding-block: 0 1rem; }

@@ -198,7 +198,7 @@ if (live) {
   const stepsList = live.querySelector("[data-steps]");
   const announcement = live.querySelector("[data-step-announcement]");
   const recheck = live.dataset.poll === "recheck";
-  let previousSteps = "";
+  let previousSteps = stepsList.dataset.snapshot;
   async function poll() {
     if (!document.hidden) {
       try {
@@ -228,7 +228,7 @@ if (live) {
               }
               return item;
             }));
-            if (previousSteps && steps.length) announcement.textContent = steps.at(-1);
+            if (steps.length) announcement.textContent = steps.at(-1);
             previousSteps = snapshot;
           }
         }
@@ -241,6 +241,9 @@ if (live) {
   setTimeout(poll, 2400);
 }
 
-document.querySelector(".paste-link")?.addEventListener("click", () => {
+document.querySelector(".paste-link")?.addEventListener("click", (event) => {
+  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  event.preventDefault();
+  document.querySelector("#paste").scrollIntoView();
   document.querySelector("#message").focus({ preventScroll: true });
 });
