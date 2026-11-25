@@ -126,6 +126,27 @@ function ticker(steps = []) {
   </div>`;
 }
 
+function liveCapture(c) {
+  const steps = c.kaneProgress?.filter(Boolean) ?? [];
+  const [verb, ...detail] = steps.at(-1)?.split(": ") ?? [];
+  const action = detail.length ? verb : c.stage === "assessing" ? "Compare" : steps.length ? "Read" : "Wait";
+  const remark = detail.length ? detail.join(": ") : steps.at(-1) ?? copy[c.stage];
+  return `<div class="reading-idle" aria-hidden="true">
+    <canvas data-idle></canvas>
+    <div class="site-wireframe">
+      <div class="wireframe-bar"><span>[ o o o ]</span><span>=== === ===</span></div>
+      <div class="wireframe-nav"><span>== == ====</span><span>=== === ==</span></div>
+      <div class="wireframe-body">
+        <p class="wireframe-step" data-active-step>STEP ${String(steps.length).padStart(2, "0")}</p>
+        <p class="wireframe-action" data-active-action>&gt; ${escape(action.toUpperCase())}</p>
+        <p class="wireframe-remark" data-active-remark>${escape(remark)}</p>
+      </div>
+      <div class="wireframe-row"><span>==== ======== ==== ======</span><span>[+]</span></div>
+      <div class="wireframe-row"><span>====== ===== ==== =========</span><span>[+]</span></div>
+    </div>
+  </div>`;
+}
+
 export function reading(c, lead, bounds) {
   const complete = c.stage === "ready";
   const title = complete ? "Kane read the site." : c.stage === "kane-reading" ? "Kane is reading the site." : copy[c.stage];
@@ -141,7 +162,7 @@ export function reading(c, lead, bounds) {
         <canvas aria-hidden="true"></canvas>
         <span class="scan-guide" aria-hidden="true"></span>
         <span class="scan-brackets" aria-hidden="true"></span>
-      </figure>` : complete ? "" : `<div class="reading-idle" aria-hidden="true"><canvas data-idle></canvas></div>`}
+      </figure>` : complete ? "" : liveCapture(c)}
       <div class="reading-detail">
         ${lead ? `<blockquote>“${escape(readingQuote(lead.quote))}”</blockquote>
           <a class="capture-link" href="${shotUrl(c, lead)}" target="_blank" rel="noopener">${bounds ? "Open full capture" : "Full capture · quote position unavailable"} <span aria-hidden="true">↗</span></a>`
@@ -204,8 +225,9 @@ function claimRow(c, sentence, { shared, offerWrongPage, bounds }) {
   const pitch = `<span class="pitch-text" data-demo="draft-claim" data-struck="${contradicted}">${contradicted ? `<s>${escape(text)}</s>` : escape(text)}</span>`;
   const capturedAt = c.kane?.capturedAt;
   const readableTime = capturedAt?.replace("T", " ").replace(/(?:\.\d+)?Z$/, " UTC");
+  const excerpt = bound && contradicted ? readingQuote(quote) : "";
   const proof = bound ? `
-    <blockquote data-demo="kane-quote">${escape(quote)}</blockquote>
+    <blockquote data-demo="kane-quote">${excerpt ? `<mark>${escape(excerpt)}</mark>${escape(quote.slice(excerpt.length))}` : escape(quote)}</blockquote>
     <p class="evidence-source">${originalSource ? "Re-check page" : copy.citation} <a data-demo="kane-source" href="${escape(sourceUrl)}" rel="noreferrer">${escape(pageLabel(sourceUrl))}</a></p>
     ${originalSource ? `<p class="evidence-source">Original capture ${escape(pageLabel(originalSource))}</p>` : ""}
     ${shotCrop(c, sentence, bounds.get(claim))}
@@ -216,7 +238,7 @@ function claimRow(c, sentence, { shared, offerWrongPage, bounds }) {
   return `<li class="claim${flagged ? " flagged" : ""}" data-demo="claim-row" data-claim="${claim}">
     <p class="claim-pitch">${pitch}</p>
     ${flagged ? `<div class="claim-alert" data-demo="claim-recheck" data-verdict="missing">
-      <strong>Quote missing from the cited page</strong>
+      <strong>[ NOT ON THE CITED PAGE ]</strong>
       ${result.visitedUrl && result.visitedUrl !== sourceUrl && result.visitedUrl !== originalSource ? `<p>Kane visited ${escape(pageLabel(result.visitedUrl))} during the re-check.</p>` : ""}
     </div>` : ""}
     <div data-demo="final-claim" data-verdict="${escape(verdict)}"${bound ? ` data-evidence="${escape(evidence)}"` : ""}>${proof}</div>
@@ -225,7 +247,7 @@ function claimRow(c, sentence, { shared, offerWrongPage, bounds }) {
   </li>`;
 }
 
-function recheckPanel(c, { shared, offerRecheck }, lead) {
+function recheckPanel(c, { shared, offerRecheck }, hasEvidence) {
   const recheck = c.recheck;
   const running = recheck?.status === "running";
   const shareable = canShare(c);
@@ -234,11 +256,11 @@ function recheckPanel(c, { shared, offerRecheck }, lead) {
   const detail = shareable ? "A second Kane run found every quote on its cited page."
     : c.replay || recheck?.replay ? copy.replay
     : recheck?.status === "failed" ? "At least one quote was missing from its cited page. Sharing is locked."
-    : !lead ? copy.noQuotes
+    : !hasEvidence ? copy.noQuotes
     : running ? "Share unlocks after Kane finds every quote again."
     : "Share unlocks after a successful re-check.";
   return `<aside class="recheck-panel"${running ? ` data-live-case="${c.id}" data-poll="recheck"` : ""}>
-    <h2${recheck ? ` role="status" data-demo="kane-recheck" data-verdict="${recheckVerdict[recheck.status] ?? recheck.status}"` : ""}>${status}</h2>
+    <h2${recheck ? ` role="status" data-demo="kane-recheck" data-verdict="${recheckVerdict[recheck.status] ?? recheck.status}"` : ""}>${status}${recheck?.status === "failed" ? ' <span aria-hidden="true">· Share locked</span>' : ""}</h2>
     <p class="recheck-detail">${detail}</p>
     ${running ? ticker(recheck.progress) : ""}
     ${!shared && offerRecheck && canRecheck(c) ? action(c, "recheck", copy.recheck, { primary: true }) : ""}
@@ -257,9 +279,8 @@ export function report(c, { shared = false, offerRecheck = true, offerWrongPage 
 
   const lines = reportHeading(c);
   const longest = Math.max(...lines.map((line) => line.length));
-  const lead = leadEvidence(c) ?? c.sentences[0];
+  const [lead, ...remaining] = [...c.sentences].sort((a, b) => a.claim - b.claim);
   const notice = c.regulator;
-  const remaining = c.sentences.filter((sentence) => sentence !== lead);
   const claimOptions = { shared, offerWrongPage, bounds };
   return layout(`<article data-demo="report" class="report-page">
     <header class="report-heading">
@@ -273,7 +294,7 @@ export function report(c, { shared = false, offerRecheck = true, offerWrongPage 
     </header>
     <div class="report-flow">
       ${lead ? `<ol class="claim-list lead-claim">${claimRow(c, lead, { ...claimOptions, offerWrongPage: false })}</ol>` : `<p class="lead-claim">${copy.empty}</p>`}
-      ${recheckPanel(c, claimOptions, lead?.bound && lead)}
+      ${recheckPanel(c, claimOptions, c.sentences.some(({ bound }) => bound))}
       ${remaining.length ? `<ol class="claim-list remaining-claims" start="2">${remaining.map((sentence) => claimRow(c, sentence, claimOptions)).join("")}</ol>` : ""}
       ${notice ? `<section class="regulator" data-demo="regulator">
         <h2>${copy.regulator}</h2>

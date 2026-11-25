@@ -163,18 +163,27 @@ if (scan) {
 function drawCapture(frame, image, canvas, bounds) {
   const { clientWidth: width, clientHeight: height } = frame;
   if (!width || !height) return;
-  const scale = Math.max(width / image.naturalWidth, height / image.naturalHeight);
-  const imageWidth = image.naturalWidth * scale;
-  const imageHeight = image.naturalHeight * scale;
-  const evidenceScaleX = imageWidth / bounds.width;
-  const evidenceScaleY = imageHeight / bounds.height;
-  const targetX = Math.max(0, (bounds.x - 27) * evidenceScaleX);
-  const targetY = Math.max(0, (bounds.y - 91) * evidenceScaleY);
-  const targetRight = Math.min(imageWidth, (bounds.right + 32) * evidenceScaleX);
-  const targetBottom = Math.min(imageHeight, (bounds.bottom + 25) * evidenceScaleY);
-  // Start centered and shift only far enough to keep the evidence within the frame.
-  const left = Math.max(width - imageWidth, Math.min(0, -targetX, Math.max((width - imageWidth) / 2, width - targetRight)));
-  const top = Math.max(height - imageHeight, Math.min(0, -targetY, Math.max((height - imageHeight) / 2, height - targetBottom)));
+  const mobile = matchMedia("(max-width: 760px)").matches;
+  const x = Math.max(0, bounds.x - 24);
+  const y = Math.max(0, bounds.y - 77);
+  const right = Math.min(bounds.width, bounds.right + 24);
+  const bottom = Math.min(bounds.height, bounds.bottom + 22);
+  const scale = mobile
+    ? Math.min((width - 24) / (right - x), (height - 24) / (bottom - y))
+    : Math.min(width / bounds.width, height / bounds.height);
+  const imageWidth = bounds.width * scale;
+  const imageHeight = bounds.height * scale;
+  const targetX = x * scale;
+  const targetY = y * scale;
+  const targetRight = right * scale;
+  const targetBottom = bottom * scale;
+  const left = mobile
+    ? Math.min(0, Math.max(width - imageWidth, (width - targetX - targetRight) / 2))
+    : (width - imageWidth) / 2;
+  const focusTop = Math.min(height - 12 - targetBottom, Math.max(12 - targetY, height * .76 - (targetY + targetBottom) / 2));
+  const top = mobile && imageHeight > height
+    ? Math.min(0, Math.max(height - imageHeight, focusTop))
+    : (height - imageHeight) / 2;
 
   const geometry = {
     "image-width": imageWidth, "image-height": imageHeight, "image-left": left, "image-top": top,
@@ -187,28 +196,59 @@ function drawCapture(frame, image, canvas, bounds) {
   };
   for (const [name, value] of Object.entries(geometry)) frame.style.setProperty("--" + name, value + "px");
 
-  const cellWidth = 4.1;
-  const cellHeight = 5.8;
+  const context = fitCanvas(canvas, width, height);
+  drawCaptureGlyphs(context, image, width, height, { left, top, imageWidth, imageHeight });
+  // Retain the site's actual masthead when the mobile crop starts below it.
+  if (mobile && top < -imageHeight * .16) {
+    const mastheadHeight = Math.ceil(width * bounds.height * .19 / bounds.width);
+    context.clearRect(0, 0, width, mastheadHeight);
+    drawCaptureGlyphs(context, image, width, mastheadHeight, {
+      left: 0, top: 0, imageWidth: width, imageHeight: width * bounds.height / bounds.width,
+    });
+    context.globalAlpha = .45;
+    context.fillRect(0, mastheadHeight, width, 1);
+  }
+}
+
+function drawCaptureGlyphs(context, image, width, height, { left, top, imageWidth, imageHeight }) {
+  const cellWidth = 3;
+  const cellHeight = 4.25;
   const columns = Math.ceil(width / cellWidth);
   const rows = Math.ceil(height / cellHeight);
+  const samples = 3;
   const sample = document.createElement("canvas");
-  sample.width = columns;
-  sample.height = rows;
+  sample.width = columns * samples;
+  sample.height = rows * samples;
   const sampleContext = sample.getContext("2d");
-  sampleContext.drawImage(image, left * columns / width, top * rows / height,
-    imageWidth * columns / width, imageHeight * rows / height);
-  const pixels = sampleContext.getImageData(0, 0, columns, rows).data;
-  const context = fitCanvas(canvas, width, height);
+  sampleContext.fillStyle = "#fff";
+  sampleContext.fillRect(0, 0, sample.width, sample.height);
+  sampleContext.drawImage(image, left * samples / cellWidth, top * samples / cellHeight,
+    imageWidth * samples / cellWidth, imageHeight * samples / cellHeight);
+  const pixels = sampleContext.getImageData(0, 0, sample.width, sample.height).data;
   context.fillStyle = "#cf9cff";
-  context.font = '600 6.3px "IBM Plex Mono", monospace';
+  context.font = '600 4.8px "IBM Plex Mono", monospace';
   context.textBaseline = "top";
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < columns; x++) {
-      const index = (y * columns + x) * 4;
-      const ink = 1 - (.25 * pixels[index] + .6 * pixels[index + 1] + .15 * pixels[index + 2]) / 255;
-      const tone = Math.min(1, Math.pow(ink, .53) + ((x * 13 + y * 7) % 9) * .025);
-      context.globalAlpha = .25 + tone * .75;
-      context.fillText(glyphs[Math.max(1, Math.round(tone * (glyphs.length - 1)))], x * cellWidth, y * cellHeight);
+      let sum = 0;
+      let darkest = 0;
+      let lightest = 1;
+      for (let dy = 0; dy < samples; dy++) {
+        for (let dx = 0; dx < samples; dx++) {
+          const index = ((y * samples + dy) * sample.width + x * samples + dx) * 4;
+          const ink = 1 - (.25 * pixels[index] + .6 * pixels[index + 1] + .15 * pixels[index + 2]) / 255;
+          sum += ink;
+          darkest = Math.max(darkest, ink);
+          lightest = Math.min(lightest, ink);
+        }
+      }
+      const mean = sum / (samples * samples);
+      const edge = darkest - lightest;
+      if (darkest < .055 && edge < .021) continue;
+      const tone = Math.min(1, Math.max(mean * .68, Math.pow(edge, .66) * 1.55, darkest * .75));
+      const char = glyphs[Math.max(1, Math.round(tone * (glyphs.length - 1)))];
+      context.globalAlpha = .34 + tone * .64;
+      context.fillText(char, x * cellWidth, y * cellHeight);
     }
   }
 }
@@ -217,6 +257,9 @@ if (live) {
   const stepsList = live.querySelector("[data-steps]");
   const announcement = live.querySelector("[data-step-announcement]");
   const recheck = live.dataset.poll === "recheck";
+  const activeStep = live.querySelector("[data-active-step]");
+  const activeAction = live.querySelector("[data-active-action]");
+  const activeRemark = live.querySelector("[data-active-remark]");
   let previousSteps = stepsList.dataset.snapshot;
   async function poll() {
     if (!document.hidden) {
@@ -232,7 +275,14 @@ if (live) {
             }
             return;
           }
-          const steps = (recheck ? progress.recheck.steps : progress.steps).filter(Boolean).slice(-3);
+          const allSteps = (recheck ? progress.recheck.steps : progress.steps).filter(Boolean);
+          const steps = allSteps.slice(-3);
+          if (activeStep && allSteps.length) {
+            const [verb, ...detail] = allSteps.at(-1).split(": ");
+            activeStep.textContent = "STEP " + String(allSteps.length).padStart(2, "0");
+            activeAction.textContent = "> " + (detail.length ? verb.toUpperCase() : "READ");
+            activeRemark.textContent = detail.length ? detail.join(": ") : verb;
+          }
           const snapshot = JSON.stringify(steps);
           if (snapshot !== previousSteps) {
             stepsList.replaceChildren(...steps.map((step) => {

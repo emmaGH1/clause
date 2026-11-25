@@ -252,7 +252,7 @@ button { cursor: pointer; }
 .reading-capture canvas,
 .scan-guide,
 .scan-brackets { display: none; }
-.reading-capture[data-bounds] { display: grid; place-items: center; aspect-ratio: 1.6; }
+.reading-capture[data-bounds] { display: grid; place-items: center; aspect-ratio: 16 / 9; }
 .reading-capture.scanned { overflow: hidden; }
 .reading-capture.scanned canvas {
   display: block;
@@ -302,8 +302,53 @@ button { cursor: pointer; }
   to { clip-path: inset(var(--clip-top) var(--clip-right) var(--clip-bottom) var(--clip-left)); }
 }
 @keyframes register-band { from { opacity: 0; } to { opacity: 1; } }
-.reading-idle { aspect-ratio: 1.6; }
-.reading-idle canvas { width: 100%; height: 100%; display: block; }
+.reading-idle {
+  display: grid;
+  align-items: center;
+  min-height: 24rem;
+  padding: clamp(.55rem, 2vw, 1.6rem);
+}
+.reading-idle canvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .65; }
+.site-wireframe {
+  position: relative;
+  display: grid;
+  gap: clamp(.3rem, 1vw, .65rem);
+  color: var(--orchid);
+  font-size: clamp(.72rem, 1.2vw, .95rem);
+}
+.wireframe-bar, .wireframe-nav, .wireframe-row {
+  display: flex;
+  justify-content: space-between;
+  column-gap: .55rem;
+  padding: .3em .8em;
+  border: 1px dashed var(--rule);
+  background: var(--ground);
+}
+.wireframe-bar { border-color: var(--orchid); }
+.wireframe-nav { border-inline: 0; }
+.wireframe-row span:last-child { flex: none; }
+.wireframe-body {
+  display: grid;
+  align-content: center;
+  min-height: clamp(10.5rem, 17vw, 15rem);
+  padding: .85rem clamp(.75rem, 3vw, 2.25rem);
+  border: 1px dashed var(--apricot);
+  background: var(--ground);
+}
+.wireframe-step { font-weight: 600; }
+.wireframe-action {
+  color: var(--apricot);
+  font: 700 clamp(1.8rem, 5.3vw, 4.7rem)/1.14 var(--display);
+  letter-spacing: -.04em;
+  mask: url("/assets/glyph-mask.svg") repeat;
+}
+.wireframe-remark {
+  margin-top: .5rem;
+  color: var(--linen);
+  font-size: clamp(.97rem, 1.8vw, 1.4rem);
+  line-height: 1.35;
+  text-wrap: pretty;
+}
 .reading-detail { display: grid; gap: .9rem; align-content: center; }
 .reading-detail blockquote {
   color: var(--linen);
@@ -340,7 +385,8 @@ button { cursor: pointer; }
 @media (max-width: 760px) {
   .reading-heading { padding-block: 0 1rem; }
   .reading-grid { grid-template-columns: minmax(0, 1fr); gap: 1.1rem; }
-  .reading-capture[data-bounds], .reading-idle { aspect-ratio: 1.25; }
+  .reading-capture[data-bounds] { aspect-ratio: 1.03; }
+  .reading-idle { min-height: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   .reading-capture.scanned img, .scan-brackets, .scan-guide { animation: none; }
@@ -397,6 +443,7 @@ button { cursor: pointer; }
 }
 .claim blockquote::before { content: "“"; }
 .claim blockquote::after { content: "”"; }
+.claim blockquote mark { color: var(--apricot); background: transparent; }
 .evidence-source {
   margin-top: .65rem;
   color: var(--muted);
@@ -433,15 +480,17 @@ button { cursor: pointer; }
 }
 code { font-family: var(--mono); }
 .claim-alert {
-  border: 1px dashed var(--apricot);
+  border: 1px solid var(--apricot);
   padding: .62rem .75rem;
   margin-block: .85rem 1rem;
   color: var(--apricot);
+  background: #301b30;
   font-size: .9rem;
 }
 .claim-alert p { color: var(--linen); margin-top: .2rem; }
 .claim-pitch s { mask: url("/assets/glyph-mask.svg") repeat; mask-size: 9px 9px; }
-.claim.flagged .claim-pitch { color: var(--apricot); }
+.claim.flagged { border-color: var(--apricot); }
+.claim.flagged .claim-pitch, .claim.flagged .claim-pitch s { color: var(--apricot); text-decoration-color: var(--apricot); }
 .recheck-panel {
   grid-column: 2;
   grid-row: 1;
@@ -452,7 +501,11 @@ code { font-family: var(--mono); }
   border-block: 1px dashed var(--rule);
 }
 .recheck-panel h2 { font-size: clamp(1.35rem, 2.65vw, 2.15rem); }
-.recheck-panel h2[data-verdict="missing"] { color: var(--apricot); }
+.recheck-panel h2[data-verdict="missing"] {
+  color: var(--apricot);
+  font-size: clamp(1.65rem, 3.1vw, 2.65rem);
+}
+.recheck-panel h2[data-verdict="missing"] span { display: block; }
 .recheck-detail { color: var(--muted); font-size: .93rem; }
 .recheck-panel .ticker:has(li) { margin-top: 0; }
 .recheck-panel .button:disabled { border-style: dashed; }
