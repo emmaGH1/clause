@@ -51,7 +51,7 @@ function drawRibbons(context, width, height) {
       const tilt = Math.sin(phase * .45 + row * .11) * 17;
       const top = 17 + wave + tilt + row * 4;
       const bottom = height - 25 - wave + tilt + row * 4;
-      const glyph = glyphs[1 + Math.floor(density * 12)];
+      const glyph = glyphs[1 + Math.floor(density * (glyphs.length - 1))];
       context.fillStyle = Math.cos(phase + row * .23) > .47 ? "#ffaa70" : "#cf9cff";
       context.globalAlpha = strength * (x < start ? .30 : .56);
       if (x > start) context.fillText(glyph, x, top);

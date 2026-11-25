@@ -242,10 +242,8 @@ button { cursor: pointer; }
 .reading-capture canvas,
 .scan-guide,
 .scan-brackets { display: none; }
-.reading-capture.scanned {
-  overflow: hidden;
-  aspect-ratio: 1.6;
-}
+.reading-capture[data-bounds] { display: grid; place-items: center; aspect-ratio: 1.6; }
+.reading-capture.scanned { overflow: hidden; }
 .reading-capture.scanned canvas {
   display: block;
   position: absolute;
@@ -327,7 +325,7 @@ button { cursor: pointer; }
 @media (max-width: 760px) {
   .reading-heading { padding-block: 0 1rem; }
   .reading-grid { grid-template-columns: minmax(0, 1fr); gap: 1.1rem; }
-  .reading-capture.scanned, .reading-idle { aspect-ratio: 1.25; }
+  .reading-capture[data-bounds], .reading-idle { aspect-ratio: 1.25; }
 }
 @media (prefers-reduced-motion: reduce) {
   .reading-capture.scanned img, .scan-brackets, .scan-guide { animation: none; }
