@@ -14,17 +14,16 @@ const copy = {
   "kane-reading": "Kane is reading the public site…",
   assessing: "Matching Kane’s evidence to the claims…",
   running: "Kane is rechecking the cited pages…",
-  passed: "Kane found every cited quote again.",
+  passed: "Re-checked by Kane",
   empty: "The message contains no quoted pitch claims to check.",
   noQuotes: "Sharing requires a quote captured and rechecked by Kane.",
-  failed: "Recheck failed. Sharing is locked.",
-  recheck: "Recheck cited pages",
+  failed: "Re-check failed",
+  recheck: "Re-check cited pages",
   point: "Point this claim at the homepage",
   share: "Share",
-  captured: "Captured by Kane",
   citation: "Cited page",
   run: "Kane run ID",
-  freshRun: "Kane recheck run ID",
+  freshRun: "Re-check run",
   shot: "Screenshot of the source page captured by Kane",
   regulator: "Regulator notice",
   noticeLink: "Read the original notice",
@@ -101,6 +100,11 @@ function stepMarkup(step) {
   return match ? `<span>${escape(match[1])}</span> ${escape(match[2])}` : escape(step);
 }
 
+function readingQuote(quote) {
+  const firstSentence = quote.match(/^.*?[.!?](?=\s+[A-Z]|$)/u)?.[0];
+  return firstSentence ?? quote;
+}
+
 function ticker(steps = []) {
   const events = steps.filter(Boolean);
   return `<div class="ticker">
@@ -126,73 +130,149 @@ export function reading(c, lead, bounds) {
         <span class="scan-brackets" aria-hidden="true"></span>
       </figure>` : complete ? "" : `<div class="reading-idle" aria-hidden="true"><canvas data-idle></canvas></div>`}
       <div class="reading-detail">
-        ${lead ? `<blockquote>“${escape(lead.quote)}”</blockquote>
+        ${lead ? `<blockquote>“${escape(readingQuote(lead.quote))}”</blockquote>
           <a class="capture-link" href="${shotUrl(c, lead)}" target="_blank" rel="noopener">${bounds ? "Open full capture" : "Full capture · quote position unavailable"} <span aria-hidden="true">↗</span></a>`
           : complete ? `<p>${c.sentences?.length ? NOT_FOUND : copy.empty}</p>` : ""}
         ${source ? `<p class="reading-source">${escape(defang(source))}</p>` : ""}
         ${complete ? `<a class="button primary" href="/case/${c.id}"><span aria-hidden="true">[</span> Read the report <span aria-hidden="true">→ ]</span></a>` : `<p class="reading-status" role="status"><span aria-hidden="true">▍</span> ${copy[c.stage]}</p>`}
       </div>
     </div>
-    ${ticker(c.kaneProgress)}
+    ${complete ? "" : ticker(c.kaneProgress)}
   </section>`, { mode: "reading", refresh: !complete });
 }
 
-function action(c, name, label, extra = "", disabled = false) {
-  return `<form method="post" action="/case/${c.id}/${name}">${extra}<button${disabled ? " disabled" : ""}>${label}</button></form>`;
+function action(c, name, label, { extra = "", disabled = false, primary = false, quiet = false, visible = label } = {}) {
+  return `<form method="post" class="${name}-form" action="/case/${c.id}/${name}">${extra}
+    <button class="${quiet ? "text-button" : `button${primary ? " primary" : ""}`}" aria-label="${escape(label)}"${disabled ? " disabled" : ""}>
+      ${quiet ? escape(visible) : `<span aria-hidden="true">[</span> ${escape(visible)} <span aria-hidden="true">${disabled ? "]" : "→ ]"}</span>`}
+    </button>
+  </form>`;
 }
 
-function claimRow(c, sentence, { shared, offerWrongPage }) {
+function reportHeading(c) {
+  const labels = c.sentences.filter(({ verdict }) => verdict === "corrected").flatMap(({ text }) => {
+    const claim = text.trim().replace(/[.!?]+$/u, "");
+    const descriptor = /^(?:.+\b(?:am|is|are|was|were|be)\s+)?([\p{L}][\p{L}-]{1,10})$/iu.exec(claim)?.[1];
+    return descriptor ? [`Not ${descriptor.toLowerCase()}.`] : [];
+  });
+  const distinct = [...new Set(labels)].slice(0, 2);
+  if (distinct.length) return distinct;
+  return c.sentences.some(({ verdict }) => verdict === "corrected") ? ["The pitch", "falls short."] : [copy.report];
+}
+
+function shotCrop(c, sentence, bounds) {
+  const url = shotUrl(c, sentence);
+  let geometry = "";
+  if (bounds) {
+    const { x, y, right, bottom, width, height } = bounds;
+    const left = Math.max(0, x - 30);
+    const top = Math.max(0, y - 103);
+    const cropWidth = Math.min(width, right + 39) - left;
+    const cropHeight = Math.min(height, bottom + 30) - top;
+    geometry = ` style="--crop-ratio:${cropWidth}/${cropHeight};--shot-w:${width / cropWidth * 100}%;--shot-x:${left / cropWidth * -100}%;--shot-y:${top / cropHeight * -100}%;"`;
+  }
+  return `<figure class="evidence-frame" data-demo="kane-shot">
+    <a href="${url}" target="_blank" rel="noopener" class="shot-link" aria-label="Open full Kane capture in a new tab">
+      <span class="bracket-edge" aria-hidden="true"><span>[</span><span>]</span></span>
+      <span class="shot-window${bounds ? " crop" : ""}"${geometry}><img src="${url}" alt="${copy.shot}"></span>
+      <span class="bracket-edge" aria-hidden="true"><span>[</span><span>]</span></span>
+    </a>
+    <figcaption>${bounds ? "Open full capture" : "Full capture · quote position unavailable"} <span aria-hidden="true">↗</span></figcaption>
+  </figure>`;
+}
+
+function claimRow(c, sentence, { shared, offerWrongPage, bounds }) {
   const { claim, text, verdict, bound, evidence, quote, sourceUrl } = sentence;
   const contradicted = verdict === "corrected";
   const result = c.recheck?.perClaim?.find((entry) => entry.claim === claim);
+  const flagged = result && !result.matched && c.recheck.status === "failed";
+  const originalSource = c.wrongPage?.claim === claim ? c.wrongPage.originalUrl : null;
+  const pageLabel = (url) => defang(url).replace(/^www\[\.\]/, "");
   const pitch = `<span class="pitch-text" data-demo="draft-claim" data-struck="${contradicted}">${contradicted ? `<s>${escape(text)}</s>` : escape(text)}</span>`;
+  const capturedAt = c.kane?.capturedAt;
+  const readableTime = capturedAt?.replace("T", " ").replace(/(?:\.\d+)?Z$/, " UTC");
   const proof = bound ? `
     <blockquote data-demo="kane-quote">${escape(quote)}</blockquote>
-    <figure data-demo="kane-shot"><img src="/api/cases/${c.id}/shots/${claim}.jpg" alt="${copy.shot}"></figure>
-    <p>${copy.citation} <a data-demo="kane-source" href="${escape(sourceUrl)}" rel="noreferrer">${escape(defang(sourceUrl))}</a></p>
-    <p>${copy.captured} <time datetime="${escape(c.kane.capturedAt)}">${escape(c.kane.capturedAt)}</time></p>`
-    : `<p>${escape(sentence.english)}</p>`;
-  return `<li data-demo="claim-row" data-claim="${claim}">
-  <p>${pitch}</p>
-  <div data-demo="final-claim" data-verdict="${verdict}"${bound ? ` data-evidence="${escape(evidence)}"` : ""}>${proof}</div>
-  ${result && !result.matched && c.recheck.status === "failed" ? `<p data-demo="claim-recheck" data-verdict="missing">${NOT_FOUND}</p>` : ""}
-  ${!shared && offerWrongPage && canPointAtHomepage(c, sentence) ? action(c, "wrong-page", copy.point, `<input type="hidden" name="claim" value="${claim}">`) : ""}
-</li>`;
+    <p class="evidence-source">${originalSource ? "Re-check page" : copy.citation} <a data-demo="kane-source" href="${escape(sourceUrl)}" rel="noreferrer">${escape(pageLabel(sourceUrl))}</a></p>
+    ${originalSource ? `<p class="evidence-source">Original capture ${escape(pageLabel(originalSource))}</p>` : ""}
+    ${shotCrop(c, sentence, bounds.get(claim))}
+    <div class="capture-meta">
+      ${capturedAt ? `<p>Captured <time datetime="${escape(capturedAt)}">${escape(readableTime)}</time></p>` : ""}
+      ${c.kane?.runId ? `<p>Run <code>${escape(c.kane.runId)}</code></p>` : ""}
+    </div>` : `<p class="no-evidence">${NOT_FOUND}</p>`;
+  return `<li class="claim${flagged ? " flagged" : ""}" data-demo="claim-row" data-claim="${claim}">
+    <p class="claim-pitch">${pitch}</p>
+    ${flagged ? `<div class="claim-alert" data-demo="claim-recheck" data-verdict="missing">
+      <strong>Quote missing from the cited page</strong>
+      ${result.visitedUrl && result.visitedUrl !== sourceUrl && result.visitedUrl !== originalSource ? `<p>Kane visited ${escape(pageLabel(result.visitedUrl))} during the re-check.</p>` : ""}
+    </div>` : ""}
+    <div data-demo="final-claim" data-verdict="${escape(verdict)}"${bound ? ` data-evidence="${escape(evidence)}"` : ""}>${proof}</div>
+    ${!shared && offerWrongPage && canPointAtHomepage(c, sentence)
+      ? action(c, "wrong-page", copy.point, { extra: `<input type="hidden" name="claim" value="${claim}">`, quiet: true }) : ""}
+  </li>`;
 }
 
-export function report(c, { shared = false, offerRecheck = true, offerWrongPage = true } = {}) {
-  const heading = `<h1>${shared ? copy.shared : copy.report}</h1>
-    ${c.regulator ? `<p data-demo="supported-demo">${copy.supported}</p>` : ""}
-    ${c.replay || c.recheck?.replay ? `<p data-demo="replay">${copy.replay}</p>` : ""}
-    ${c.wrongPage ? `<p data-demo="wrong-page">${copy.wrongPage}</p>` : ""}`;
-  if (c.format !== 1 || c.stage === "failed") return layout(`${heading}<p role="status">${INCOMPLETE}</p><a href="/">${copy.newCheck}</a>`);
-  if (c.stage !== "ready") {
-    const progress = c.kaneProgress?.filter(Boolean) ?? [];
-    return layout(`${heading}<p role="status">${copy[c.stage]}</p>
-      ${progress.length ? `<ol>${progress.map((step) => `<li>${escape(step)}</li>`).join("")}</ol>` : ""}`, { refresh: true });
-  }
-
+function recheckPanel(c, { shared, offerRecheck }, lead) {
   const recheck = c.recheck;
+  const running = recheck?.status === "running";
+  const shareable = canShare(c);
   const recheckVerdict = { passed: "match", failed: "missing" };
+  const status = recheck ? recheck.status === "incomplete" ? INCOMPLETE : copy[recheck.status] : "Re-check the evidence";
+  const detail = shareable ? "A second Kane run found every quote on its cited page."
+    : c.replay || recheck?.replay ? copy.replay
+    : recheck?.status === "failed" ? "At least one quote was missing from its cited page. Sharing is locked."
+    : !lead ? copy.noQuotes
+    : running ? "Share unlocks after Kane finds every quote again."
+    : "Share unlocks after a successful re-check.";
+  return `<aside class="recheck-panel"${running ? ` data-live-case="${c.id}" data-poll="recheck"` : ""}>
+    <h2${recheck ? ` role="status" data-demo="kane-recheck" data-verdict="${recheckVerdict[recheck.status] ?? recheck.status}"` : ""}>${status}</h2>
+    <p class="recheck-detail">${detail}</p>
+    ${running ? ticker(recheck.progress) : ""}
+    ${!shared && offerRecheck && canRecheck(c) ? action(c, "recheck", copy.recheck, { primary: true }) : ""}
+    ${!shared ? action(c, "share", copy.share, { disabled: !shareable, primary: shareable, visible: shareable ? "Share report" : "Share locked" }) : ""}
+    ${c.kane?.runId || recheck?.runId ? `<dl class="run-list">
+      ${c.kane?.runId ? `<div><dt>${copy.run}</dt><dd><code data-demo="kane-run">${escape(c.kane.runId)}</code></dd></div>` : ""}
+      ${recheck?.runId ? `<div><dt>${copy.freshRun}</dt><dd><code data-demo="kane-recheck-run">${escape(recheck.runId)}</code></dd></div>` : ""}
+    </dl>` : ""}
+    ${c.wrongPage ? `<a href="/case/${escape(c.wrongPage.from)}">Return to original report <span aria-hidden="true">↗</span></a>` : ""}
+  </aside>`;
+}
+
+export function report(c, { shared = false, offerRecheck = true, offerWrongPage = true, bounds = new Map() } = {}) {
+  if (c.format !== 1 || c.stage === "failed") return layout(`<div class="error-page"><h1>${copy.report}</h1><p role="status">${INCOMPLETE}</p><a href="/">${copy.newCheck}</a></div>`);
+  if (c.stage !== "ready") return reading(c);
+
+  const lines = reportHeading(c);
+  const longest = Math.max(...lines.map((line) => line.length));
+  const lead = leadEvidence(c) ?? c.sentences[0];
   const notice = c.regulator;
-  const rows = c.sentences.map((sentence) => claimRow(c, sentence, { shared, offerWrongPage })).join("");
-  return layout(`<article data-demo="report">
-    ${heading}
-    ${rows ? `<ol>${rows}</ol>` : `<p>${copy.empty}</p>`}
-    ${c.kane?.runId ? `<p>${copy.run} <code data-demo="kane-run">${escape(c.kane.runId)}</code></p>` : ""}
-    ${notice ? `<section data-demo="regulator">
-      <h2>${copy.regulator}</h2>
-      <blockquote>${escape(notice.quote)}</blockquote>
-      <p><span data-demo="regulator-name">${escape(notice.name)}</span> · <time datetime="${escape(notice.date)}">${escape(notice.date)}</time></p>
-      <p><a href="${escape(notice.url)}" rel="noreferrer">${copy.noticeLink}</a></p>
-    </section>` : ""}
-    ${recheck ? `<div${recheck.status === "running" ? ` data-live-case="${c.id}" data-poll="recheck"` : ""}><p role="status" data-demo="kane-recheck" data-verdict="${recheckVerdict[recheck.status] ?? recheck.status}">
-      ${recheck.status === "incomplete" ? INCOMPLETE : copy[recheck.status]}
-    </p>${recheck.status === "running" ? ticker(recheck.progress) : ""}</div>` : ""}
-    ${recheck?.runId ? `<p>${copy.freshRun} <code data-demo="kane-recheck-run">${escape(recheck.runId)}</code></p>` : ""}
-    ${!recheck && !c.sentences.some(({ bound }) => bound) ? `<p>${copy.noQuotes}</p>` : ""}
-    ${!shared && offerRecheck && canRecheck(c) ? action(c, "recheck", copy.recheck) : ""}
-    ${!shared ? action(c, "share", copy.share, "", !canShare(c)) : ""}
-    <p><a href="/">${copy.newCheck}</a></p>
-  </article>`, { refresh: recheck?.status === "running" });
+  const remaining = c.sentences.filter((sentence) => sentence !== lead);
+  const claimOptions = { shared, offerWrongPage, bounds };
+  return layout(`<article data-demo="report" class="report-page">
+    <header class="report-heading">
+      <h1 class="glyph-title report-title" style="--headline-chars:${longest}">${lines.map((line) => `<span>${escape(line)}</span>`).join(" ")}</h1>
+      <div class="report-context">
+        ${notice ? `<p data-demo="supported-demo">${copy.supported}</p>` : c.site?.defanged ? `<p>${escape(c.site.defanged)}</p>` : ""}
+        ${shared ? `<p>${copy.shared}</p>` : ""}
+        ${c.replay || c.recheck?.replay ? `<p data-demo="replay">${copy.replay}</p>` : ""}
+        ${c.wrongPage ? `<p class="wrong-page-label" data-demo="wrong-page">${copy.wrongPage}${c.recheck?.status === "failed" ? " · Share locked" : ""}</p>` : ""}
+      </div>
+    </header>
+    <div class="report-flow">
+      ${lead ? `<ol class="claim-list lead-claim">${claimRow(c, lead, { ...claimOptions, offerWrongPage: false })}</ol>` : `<p class="lead-claim">${copy.empty}</p>`}
+      ${recheckPanel(c, claimOptions, lead?.bound && lead)}
+      ${remaining.length ? `<ol class="claim-list remaining-claims" start="2">${remaining.map((sentence) => claimRow(c, sentence, claimOptions)).join("")}</ol>` : ""}
+      ${notice ? `<section class="regulator" data-demo="regulator">
+        <h2>${copy.regulator}</h2>
+        <blockquote>${escape(notice.quote)}</blockquote>
+        <p><span data-demo="regulator-name">${escape(notice.name)}</span> · <time datetime="${escape(notice.date)}">${escape(notice.date)}</time></p>
+        <a href="${escape(notice.url)}" rel="noreferrer">${copy.noticeLink} <span aria-hidden="true">↗</span></a>
+      </section>` : ""}
+    </div>
+    <footer class="report-end">
+      ${lead && !shared && offerWrongPage && canPointAtHomepage(c, lead)
+        ? action(c, "wrong-page", copy.point, { extra: `<input type="hidden" name="claim" value="${lead.claim}">`, quiet: true, visible: "Test the lead claim against the homepage" }) : ""}
+      <a href="/">${copy.newCheck} <span aria-hidden="true">↗</span></a>
+    </footer>
+  </article>`, { refresh: c.recheck?.status === "running" });
 }

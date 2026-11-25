@@ -2,6 +2,7 @@ const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 const field = document.querySelector("[data-paper-field]");
 const rainGlyphs = "|:.,*+";
 const glyphs = " .:;=+*#%@";
+const composeRibbon = !document.body.matches(".landing") && !document.querySelector("[data-live-case]");
 
 function fitCanvas(canvas, width, height) {
   const scale = Math.min(devicePixelRatio || 1, 2);
@@ -21,6 +22,7 @@ function drawField(canvas, tick = 0, dense = false) {
   context.setTransform(scale, 0, 0, scale, 0, 0);
   context.clearRect(0, 0, width, height);
   context.font = '10px "IBM Plex Mono", monospace';
+  if (composeRibbon && !dense) drawRibbons(context, width, height);
   const spacing = dense ? 12 : 34;
   const columns = Math.ceil(width / spacing);
   for (let column = 0; column < columns; column++) {
@@ -31,6 +33,29 @@ function drawField(canvas, tick = 0, dense = false) {
       context.globalAlpha = (.12 + random * .35) * (1 - index / 7);
       const char = rainGlyphs[(column + index + Math.floor(tick / 3)) % rainGlyphs.length];
       context.fillText(char, column * spacing + 3 + random * spacing * .55, head - index * 7);
+    }
+  }
+}
+
+function drawRibbons(context, width, height) {
+  const spacing = width < 600 ? 4 : 5;
+  const start = width < 600 ? width * .38 : width * .48;
+  context.font = `600 ${spacing + 2}px "IBM Plex Mono", monospace`;
+  for (let x = 0; x < width; x += spacing) {
+    for (let row = -5; row <= 5; row++) {
+      const phase = x / width * Math.PI * 3.5;
+      const density = ((x * 23 + row * 17 + 2000) % 37) / 37;
+      const strength = .6 - Math.abs(row) * .085;
+      if (density > strength + .18) continue;
+      const wave = Math.sin(phase) * (19 + row * 1.45);
+      const tilt = Math.sin(phase * .45 + row * .11) * 17;
+      const top = 17 + wave + tilt + row * 4;
+      const bottom = height - 25 - wave + tilt + row * 4;
+      const glyph = glyphs[1 + Math.floor(density * 12)];
+      context.fillStyle = Math.cos(phase + row * .23) > .47 ? "#ffaa70" : "#cf9cff";
+      context.globalAlpha = strength * (x < start ? .30 : .56);
+      if (x > start) context.fillText(glyph, x, top);
+      context.fillText(glyph, x, bottom);
     }
   }
 }
@@ -50,10 +75,11 @@ function drawReceipt(canvas, source) {
   const pixels = sample.getContext("2d");
   const sourceRatio = source.naturalWidth / source.naturalHeight;
   const drawHeight = Math.min(rows, columns * cellWidth / cellHeight / sourceRatio);
+  const offset = mobile ? -columns * .045 : 0;
   const drawWidth = drawHeight * cellHeight * sourceRatio / cellWidth;
   pixels.translate(mobile ? columns : 0, 0);
   pixels.scale(mobile ? -1 : 1, 1);
-  pixels.drawImage(source, (columns - drawWidth) / 2, (rows - drawHeight) / 2, drawWidth, drawHeight);
+  pixels.drawImage(source, (columns - drawWidth) / 2 - offset, (rows - drawHeight) / 2, drawWidth, drawHeight);
   const rgba = pixels.getImageData(0, 0, columns, rows).data;
   context.font = `600 ${cellHeight * 1.26}px "IBM Plex Mono", monospace`;
   context.textBaseline = "top";
@@ -63,7 +89,7 @@ function drawReceipt(canvas, source) {
     const light = (.25 * red + .6 * green + .15 * blue) / 255 * alpha / 255;
     const value = Math.max(1, Math.min(glyphs.length - 1, Math.round(light * (glyphs.length - 1))));
     context.fillStyle = red > blue + 9 ? "#fff1d6" : "#cf9cff";
-    context.globalAlpha = .32 + light * .68;
+    context.globalAlpha = .42 + light * .58;
     context.fillText(glyphs[value], (index % columns) * cellWidth, Math.floor(index / columns) * cellHeight);
   }
 }
@@ -161,8 +187,8 @@ function drawCapture(frame, image, canvas, bounds) {
     for (let x = 0; x < columns; x++) {
       const index = (y * columns + x) * 4;
       const ink = 1 - (.25 * pixels[index] + .6 * pixels[index + 1] + .15 * pixels[index + 2]) / 255;
-      const tone = Math.min(1, Math.pow(ink, .65) + ((x * 13 + y * 7) % 9) * .012);
-      context.globalAlpha = .17 + tone * .82;
+      const tone = Math.min(1, Math.pow(ink, .53) + ((x * 13 + y * 7) % 9) * .025);
+      context.globalAlpha = .25 + tone * .75;
       context.fillText(glyphs[Math.max(1, Math.round(tone * (glyphs.length - 1)))], x * cellWidth, y * cellHeight);
     }
   }
@@ -214,3 +240,7 @@ if (live) {
   }
   setTimeout(poll, 2400);
 }
+
+document.querySelector(".paste-link")?.addEventListener("click", () => {
+  document.querySelector("#message").focus({ preventScroll: true });
+});

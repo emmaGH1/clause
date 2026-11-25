@@ -121,15 +121,24 @@ async function route(req, res) {
   const c = readCase(id);
   const replayFor = (wrongPage) => wrongPage ? wrongPageReplay : recheckReplay;
   const allowRecheck = (wrongPage) => (!replayMode && !c.replay) || Boolean(replayFor(wrongPage));
+  const renderReport = async (options) => {
+    const bounds = new Map();
+    if (c.format === 1 && c.stage === "ready") {
+      for (const sentence of c.sentences.filter(({ bound }) => bound)) {
+        bounds.set(sentence.claim, await quoteBounds(caseDir(id), sentence));
+      }
+    }
+    return send(res, 200, report(c, { ...options, bounds }));
+  };
   if (get && section === "case" && !action) {
     if (c.format === 1 && c.stage !== "failed" && (c.stage !== "ready" || searchParams.get("view") === "reading")) {
       const lead = leadEvidence(c);
       return send(res, 200, reading(c, lead, await quoteBounds(caseDir(id), lead)));
     }
-    return send(res, 200, report(c, { offerRecheck: allowRecheck(Boolean(c.wrongPage)), offerWrongPage: allowRecheck(true) }));
+    return renderReport({ offerRecheck: allowRecheck(Boolean(c.wrongPage)), offerWrongPage: allowRecheck(true) });
   }
   if (get && section === "share" && !action) {
-    return canShare(c) ? send(res, 200, report(c, { shared: true })) : fail(res, 404);
+    return canShare(c) ? renderReport({ shared: true }) : fail(res, 404);
   }
   if (get && section === "api/cases") {
     if (action === "progress") {
