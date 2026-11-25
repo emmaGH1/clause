@@ -203,3 +203,130 @@ button { cursor: pointer; }
   .landing-copy .button { width: 100%; justify-content: space-between; }
   .paste-link { margin: .45rem auto 0; }
 }
+
+.screen-reader {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.reading-page { padding-bottom: 4rem; }
+.reading-heading {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: .5rem 1.5rem;
+  padding-block: .5rem 1.45rem;
+}
+.reading-heading h1 { font-size: clamp(1.75rem, 4.15vw, 3.55rem); }
+.reading-heading p, .reading-source { color: var(--orchid); font-size: .9rem; }
+.reading-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+  gap: clamp(1rem, 4vw, 3rem);
+  align-items: center;
+}
+.reading-capture, .reading-idle {
+  position: relative;
+  border: 1px dashed var(--orchid);
+  background: var(--ground);
+  isolation: isolate;
+}
+.reading-capture canvas,
+.scan-guide,
+.scan-brackets { display: none; }
+.reading-capture.scanned {
+  overflow: hidden;
+  aspect-ratio: 1.6;
+}
+.reading-capture.scanned canvas {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.reading-capture.scanned img {
+  position: absolute;
+  z-index: 1;
+  width: var(--image-width);
+  height: var(--image-height);
+  max-width: none;
+  left: var(--image-left);
+  top: var(--image-top);
+  clip-path: inset(var(--clip-top) var(--clip-right) var(--clip-bottom) var(--clip-left));
+  animation: open-band 950ms cubic-bezier(.19, 1, .22, 1) 130ms both;
+}
+.scan-guide {
+  position: absolute;
+  z-index: 2;
+  top: var(--scan-y);
+  inset-inline: 0;
+  border-top: 1px solid var(--apricot);
+  animation: scan-page 1s cubic-bezier(.19, 1, .22, 1) both;
+}
+.scanned .scan-guide, .scanned .scan-brackets { display: block; }
+.scan-brackets {
+  position: absolute;
+  pointer-events: none;
+  z-index: 3;
+  inset: var(--box-top) var(--box-right) var(--box-bottom) var(--box-left);
+  border-inline: 1px solid var(--apricot);
+  background:
+    linear-gradient(var(--apricot), var(--apricot)) 0 0,
+    linear-gradient(var(--apricot), var(--apricot)) 100% 0,
+    linear-gradient(var(--apricot), var(--apricot)) 0 100%,
+    linear-gradient(var(--apricot), var(--apricot)) 100% 100%;
+  background-size: 8px 2px;
+  background-repeat: no-repeat;
+  animation: register-band 400ms ease-out 350ms both;
+}
+@keyframes scan-page { from { top: 0; opacity: .9; } 85% { opacity: .6; } to { top: var(--scan-y); opacity: 0; } }
+@keyframes open-band {
+  from { clip-path: inset(var(--clip-center) var(--clip-right) calc(100% - var(--clip-center)) var(--clip-left)); }
+  to { clip-path: inset(var(--clip-top) var(--clip-right) var(--clip-bottom) var(--clip-left)); }
+}
+@keyframes register-band { from { opacity: 0; } to { opacity: 1; } }
+.reading-idle { aspect-ratio: 1.6; }
+.reading-idle canvas { width: 100%; height: 100%; display: block; }
+.reading-detail { display: grid; gap: .9rem; align-content: center; }
+.reading-detail blockquote {
+  color: var(--linen);
+  font-weight: 600;
+  font-size: clamp(1.25rem, 2.4vw, 1.95rem);
+  line-height: 1.36;
+  letter-spacing: -.025em;
+  text-wrap: pretty;
+}
+.reading-status { color: var(--apricot); font-size: clamp(1.05rem, 2vw, 1.45rem); font-weight: 600; }
+.capture-link { font-size: .9rem; }
+.ticker:has(li) {
+  margin-block-start: 1.6rem;
+  border-top: 1px dashed var(--rule);
+}
+.ticker ol {
+  display: grid;
+  gap: .45rem;
+  list-style: none;
+  margin: 0;
+  padding: .85rem 0 0;
+  color: var(--muted);
+  font-size: .88rem;
+}
+.ticker li span { color: var(--orchid); font-weight: 600; }
+.ticker li span::before { content: "› "; }
+.ticker li:last-child { color: var(--linen); }
+
+@media (max-width: 760px) {
+  .reading-heading { padding-block: 0 1rem; }
+  .reading-grid { grid-template-columns: minmax(0, 1fr); gap: 1.1rem; }
+  .reading-capture.scanned, .reading-idle { aspect-ratio: 1.25; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reading-capture.scanned img, .scan-brackets, .scan-guide { animation: none; }
+  .scanned .scan-guide { display: none; }
+}

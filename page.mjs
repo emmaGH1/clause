@@ -45,7 +45,7 @@ function layout(body, { mode = "report", refresh = false } = {}) {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  ${refresh ? '<meta http-equiv="refresh" content="2">' : ""}
+  ${refresh ? '<noscript><meta http-equiv="refresh" content="3"></noscript>' : ""}
   <title>${copy.name}</title>
   <meta name="theme-color" content="#180F25">
   <link rel="stylesheet" href="/assets/clause.css">
@@ -86,6 +86,55 @@ export function home(error = "", sample = null) {
 
 export function errorPage(status) {
   return layout(`<h1>${errors[status]}</h1><p><a href="/">${copy.newCheck}</a></p>`);
+}
+
+const shotUrl = (c, sentence) => `/api/cases/${c.id}/shots/${sentence.claim}.jpg`;
+
+export function leadEvidence(c) {
+  const captured = c.sentences?.filter(({ bound }) => bound) ?? [];
+  return captured.find(({ claim }) => claim === c.wrongPage?.claim)
+    ?? captured.findLast(({ verdict }) => verdict === "corrected") ?? captured[0];
+}
+
+function stepMarkup(step) {
+  const match = /^([a-z]+):\s*(.*)$/i.exec(step);
+  return match ? `<span>${escape(match[1])}</span> ${escape(match[2])}` : escape(step);
+}
+
+function ticker(steps = []) {
+  const events = steps.filter(Boolean);
+  return `<div class="ticker">
+    <ol data-steps aria-label="Latest Kane steps">${events.slice(-3).map((step) => `<li>${stepMarkup(step)}</li>`).join("")}</ol>
+    <p class="screen-reader" data-step-announcement aria-live="polite"></p>
+  </div>`;
+}
+
+export function reading(c, lead, bounds) {
+  const complete = c.stage === "ready";
+  const title = complete ? "Kane read the site." : c.stage === "kane-reading" ? "Kane is reading the site." : copy[c.stage];
+  const source = lead && (c.wrongPage?.claim === lead.claim ? c.wrongPage.originalUrl : lead.sourceUrl);
+  return layout(`<section class="reading-page"${complete ? "" : ` data-live-case="${c.id}" data-poll="read" data-stage="${c.stage}"`}>
+    <header class="reading-heading">
+      <h1>${title}</h1>
+      ${c.site ? `<p>${escape(c.site.defanged ?? defang(c.site.url))}</p>` : ""}
+    </header>
+    <div class="reading-grid">
+      ${lead ? `<figure class="reading-capture" data-scan${bounds ? ` data-bounds="${escape(JSON.stringify(bounds))}"` : ""}>
+        <img src="${shotUrl(c, lead)}" alt="${copy.shot}">
+        <canvas aria-hidden="true"></canvas>
+        <span class="scan-guide" aria-hidden="true"></span>
+        <span class="scan-brackets" aria-hidden="true"></span>
+      </figure>` : complete ? "" : `<div class="reading-idle" aria-hidden="true"><canvas data-idle></canvas></div>`}
+      <div class="reading-detail">
+        ${lead ? `<blockquote>“${escape(lead.quote)}”</blockquote>
+          <a class="capture-link" href="${shotUrl(c, lead)}" target="_blank" rel="noopener">${bounds ? "Open full capture" : "Full capture · quote position unavailable"} <span aria-hidden="true">↗</span></a>`
+          : complete ? `<p>${c.sentences?.length ? NOT_FOUND : copy.empty}</p>` : ""}
+        ${source ? `<p class="reading-source">${escape(defang(source))}</p>` : ""}
+        ${complete ? `<a class="button primary" href="/case/${c.id}"><span aria-hidden="true">[</span> Read the report <span aria-hidden="true">→ ]</span></a>` : `<p class="reading-status" role="status"><span aria-hidden="true">▍</span> ${copy[c.stage]}</p>`}
+      </div>
+    </div>
+    ${ticker(c.kaneProgress)}
+  </section>`, { mode: "reading", refresh: !complete });
 }
 
 function action(c, name, label, extra = "", disabled = false) {
@@ -137,9 +186,9 @@ export function report(c, { shared = false, offerRecheck = true, offerWrongPage 
       <p><span data-demo="regulator-name">${escape(notice.name)}</span> · <time datetime="${escape(notice.date)}">${escape(notice.date)}</time></p>
       <p><a href="${escape(notice.url)}" rel="noreferrer">${copy.noticeLink}</a></p>
     </section>` : ""}
-    ${recheck ? `<p role="status" data-demo="kane-recheck" data-verdict="${recheckVerdict[recheck.status] ?? recheck.status}">
+    ${recheck ? `<div${recheck.status === "running" ? ` data-live-case="${c.id}" data-poll="recheck"` : ""}><p role="status" data-demo="kane-recheck" data-verdict="${recheckVerdict[recheck.status] ?? recheck.status}">
       ${recheck.status === "incomplete" ? INCOMPLETE : copy[recheck.status]}
-    </p>` : ""}
+    </p>${recheck.status === "running" ? ticker(recheck.progress) : ""}</div>` : ""}
     ${recheck?.runId ? `<p>${copy.freshRun} <code data-demo="kane-recheck-run">${escape(recheck.runId)}</code></p>` : ""}
     ${!recheck && !c.sentences.some(({ bound }) => bound) ? `<p>${copy.noQuotes}</p>` : ""}
     ${!shared && offerRecheck && canRecheck(c) ? action(c, "recheck", copy.recheck) : ""}

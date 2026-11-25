@@ -4,7 +4,8 @@ import { createReadStream, existsSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { canShare, canRecheck, caseDir, createCase, latestCase, readCase, recheckCase, wrongPageCase } from "./engine/case.mjs";
-import { home, report, errorPage, errors } from "./page.mjs";
+import { home, report, reading, leadEvidence, errorPage, errors } from "./page.mjs";
+import { quoteBounds } from "./engine/evidence-bounds.mjs";
 
 const root = fileURLToPath(new URL(".", import.meta.url));
 const sampleId = "9f177adaf5e26b5d";
@@ -104,7 +105,7 @@ async function route(req, res) {
     void createCase(message, {
       replay: readReplay,
       onUpdate(c) {
-        if (!res.headersSent) redirect(res, `/case/${c.id}`);
+        if (!res.headersSent) redirect(res, `/case/${c.id}?view=reading`);
       },
     }).catch((error) => {
       console.error(error.message);
@@ -121,12 +122,23 @@ async function route(req, res) {
   const replayFor = (wrongPage) => wrongPage ? wrongPageReplay : recheckReplay;
   const allowRecheck = (wrongPage) => (!replayMode && !c.replay) || Boolean(replayFor(wrongPage));
   if (get && section === "case" && !action) {
+    if (c.format === 1 && c.stage !== "failed" && (c.stage !== "ready" || searchParams.get("view") === "reading")) {
+      const lead = leadEvidence(c);
+      return send(res, 200, reading(c, lead, await quoteBounds(caseDir(id), lead)));
+    }
     return send(res, 200, report(c, { offerRecheck: allowRecheck(Boolean(c.wrongPage)), offerWrongPage: allowRecheck(true) }));
   }
   if (get && section === "share" && !action) {
     return canShare(c) ? send(res, 200, report(c, { shared: true })) : fail(res, 404);
   }
   if (get && section === "api/cases") {
+    if (action === "progress") {
+      return json(res, {
+        stage: c.stage,
+        steps: c.kaneProgress ?? [],
+        recheck: c.recheck && { status: c.recheck.status, steps: c.recheck.progress ?? [] },
+      });
+    }
     const raw = action?.match(/^kane\/(read|recheck)\.ndjson$/);
     if (raw) return serveFile(res, join(caseDir(id), `${raw[1]}.ndjson`), "application/x-ndjson; charset=utf-8");
     const image = action?.match(/^shots\/(\d+)\.jpg$/);

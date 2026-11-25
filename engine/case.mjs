@@ -138,7 +138,11 @@ export async function recheckCase(c, { replay = null } = {}) {
   save(c, { recheck: { status: "running", replay: Boolean(replay) } });
   try {
     const objective = recheckObjective(claims, c.draft.claims);
-    const run = await runForCase(c, "recheck", objective, claims[0].sourceUrl, replay);
+    const run = await runForCase(c, "recheck", objective, claims[0].sourceUrl, replay, (event) => {
+      if (event.step && event.status === "done" && event.remark) {
+        save(c, { recheck: { ...c.recheck, progress: [...(c.recheck.progress ?? []), event.remark] } });
+      }
+    });
     save(c, { recheck: { ...compareRecheck(claims, run, c.kane.runId), replay: Boolean(replay) } });
   } catch (error) {
     console.error("Case recheck failed", c.id, error.message);
