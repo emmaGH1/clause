@@ -1,6 +1,8 @@
 import { normalize, publicUrl } from "./text.mjs";
 
 const keyFor = ({ claim }) => `r${claim}`;
+// the same page, ignoring a trailing slash or a different letter case in the host
+const samePage = (a, b) => { const x = publicUrl(a), y = publicUrl(b); return Boolean(x && y) && x.host.toLowerCase() + x.pathname.replace(/\/+$/, "") + x.search === y.host.toLowerCase() + y.pathname.replace(/\/+$/, "") + y.search; };
 
 export function recheckObjective(claims, pitchClaims) {
   return [
@@ -22,7 +24,7 @@ export function compareRecheck(claims, run, readRunId) {
     const visitedUrl = publicUrl(run.sourceUrls[variable])?.href ?? null;
     const expected = normalize(claim.quote);
     const matched = Boolean(run.status === "passed" && fresh && expected &&
-      visitedUrl === publicUrl(claim.sourceUrl)?.href &&
+      samePage(visitedUrl, claim.sourceUrl) &&
       normalize(foundText) !== "NOT FOUND" && normalize(foundText).includes(expected));
     return { claim: claim.claim, variable, sourceUrl: claim.sourceUrl, visitedUrl, foundText, matched };
   });
