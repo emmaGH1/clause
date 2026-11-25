@@ -60,19 +60,31 @@ function layout(body, { mode = "report", refresh = false } = {}) {
 
 export function home(error = "", sample = null) {
   const excerpt = sample?.message.match(/Your money[^.]*\.\s+Withdrawals are instant and free(?=,|\.)/i)?.[0];
-  const hero = sample && excerpt && !error ? `
+  const samplePitch = excerpt && !error ? `
+  <div class="landing-copy">
+    <div class="sample-receipt">
+      <p class="sample-label">Sample pitch someone sent you</p>
+      <blockquote>${escape(excerpt).replace(/\b(?:doubles in 2 weeks|instant|free)\b/gi, "<u>$&</u>")}.</blockquote>
+    </div>
+    <a class="button primary" aria-label="Check" href="/case/${sample.id}?view=reading"><span aria-hidden="true">[</span> Check this pitch <span aria-hidden="true">→ ]</span></a>
+    <a class="paste-link" href="#paste">Paste your own <span aria-hidden="true">↘</span></a>
+  </div>` : "";
+  const hero = !error ? `
 <section class="landing-hero">
   <div class="landing-title">
-    <p class="pitch-label">The pitch</p>
-    <h1 class="glyph-title"><span>Instant</span><span>&amp; free.</span></h1>
+    <h1 class="glyph-title"><span>Did their site</span> <span>say that?</span></h1>
+    <p>Paste an investment pitch. Kane, an AI testing agent, opens the company's own website and brings back their exact words, with screenshots.</p>
   </div>
-  <canvas class="receipt-art" data-receipt="/assets/receipt.webp" aria-hidden="true"></canvas>
-  <div class="landing-copy">
-    <p>${escape(excerpt)}.</p>
-    <a class="button primary" href="/case/${sample.id}?view=reading"><span aria-hidden="true">[</span> Check this pitch <span aria-hidden="true">→ ]</span></a>
-    <a class="paste-link" href="#paste">Paste your own <span aria-hidden="true">↘</span></a>
+  <div class="landing-demo">
+    <canvas class="receipt-art" data-receipt="/assets/receipt.webp" aria-hidden="true"></canvas>
+    ${samplePitch}
   </div>
-</section>` : "";
+</section>
+<ol class="landing-steps" aria-label="How Clause works">
+  <li><span aria-hidden="true">01</span> Paste a pitch</li>
+  <li><span aria-hidden="true">02</span> Kane reads their site, live</li>
+  <li><span aria-hidden="true">03</span> Their own words, re-checked before you share</li>
+</ol>` : "";
   return layout(`${hero}
 <form id="paste" class="paste-form" method="post" action="/cases" data-demo="app-ready">
   <h${hero ? 2 : 1}>Check an investment pitch</h${hero ? 2 : 1}>

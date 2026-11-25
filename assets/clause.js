@@ -81,16 +81,35 @@ function drawReceipt(canvas, source) {
   pixels.scale(mobile ? -1 : 1, 1);
   pixels.drawImage(source, (columns - drawWidth) / 2 - offset, (rows - drawHeight) / 2, drawWidth, drawHeight);
   const rgba = pixels.getImageData(0, 0, columns, rows).data;
+  const paper = new Uint8Array(columns * rows);
+  for (let index = 0; index < paper.length; index++) {
+    const [red, green, blue, alpha] = rgba.subarray(index * 4, index * 4 + 4);
+    paper[index] = alpha > 90 && red > blue + 7 && green > blue + 1;
+  }
   context.font = `600 ${cellHeight * 1.26}px "IBM Plex Mono", monospace`;
   context.textBaseline = "top";
   for (let index = 0; index < columns * rows; index++) {
     const [red, green, blue, alpha] = rgba.subarray(index * 4, index * 4 + 4);
     if (alpha < 34) continue;
+    const x = index % columns;
+    const y = Math.floor(index / columns);
+    if (paper[index]) {
+      const edge = !paper[index - 1] || !paper[index + 1] || !paper[index - columns] || !paper[index + columns];
+      const sourceY = (y - (rows - drawHeight) / 2) / drawHeight;
+      const tilt = Math.floor((mobile ? -x : x) / 11);
+      const printed = sourceY > .435 && sourceY < .805 && (y + tilt) % 4 === 0;
+      const char = edge ? (paper[index - columns] && paper[index + columns] ? "|" : "=")
+        : printed ? "==++===="[x % 8] : red < 165 ? "%" : ":."[x % 2];
+      context.fillStyle = "#fff1d6";
+      context.globalAlpha = edge || printed ? 1 : .4 + red / 255 * .25;
+      context.fillText(char, x * cellWidth, y * cellHeight);
+      continue;
+    }
     const light = (.25 * red + .6 * green + .15 * blue) / 255 * alpha / 255;
     const value = Math.max(1, Math.min(glyphs.length - 1, Math.round(light * (glyphs.length - 1))));
-    context.fillStyle = red > blue + 9 ? "#fff1d6" : "#cf9cff";
+    context.fillStyle = "#cf9cff";
     context.globalAlpha = .42 + light * .58;
-    context.fillText(glyphs[value], (index % columns) * cellWidth, Math.floor(index / columns) * cellHeight);
+    context.fillText(glyphs[value], x * cellWidth, y * cellHeight);
   }
 }
 
