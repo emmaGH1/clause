@@ -76,10 +76,13 @@ async function verifyRecheck(page, c, read, re) {
     const result = c.recheck.perClaim.find(({ claim }) => claim === sentence.claim);
     const slot = `r${sentence.claim}`;
     requireThat(result?.variable === slot && result.sourceUrl === source, "recheck is not tied to the cited claim and page");
-    requireThat(publicUrl(vars[`${slot}_url`])?.href === source && result.visitedUrl === source, "raw recheck did not record the cited page as visited");
+    const kanePage = publicUrl(vars[`${slot}_url`])?.href;
+    requireThat(kanePage, "raw recheck recorded no page for this claim");
+    // a quote only counts when Kane read it on the cited page; finding it elsewhere is a miss
+    const onCited = kanePage.replace(/\/$/, "") === source.replace(/\/$/, "");
     const text = normalize(vars[slot]);
     requireThat(text && normalize(result.foundText) === text, "recheck text on the case differs from the raw Kane output");
-    requireThat(result.matched === (text !== "NOT FOUND" && text.includes(normalize(quote))), "Kane’s raw text disagrees with the claim’s recheck result");
+    requireThat(result.matched === (onCited && text !== "NOT FOUND" && text.includes(normalize(quote))), "Kane’s raw text and page disagree with the claim’s recheck result");
   }
   return runId;
 }

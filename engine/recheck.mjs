@@ -23,10 +23,12 @@ export function compareRecheck(claims, run, readRunId) {
   const perClaim = claims.map((claim) => {
     const variable = keyFor(claim);
     const foundText = typeof run.vars[variable] === "string" ? run.vars[variable] : "";
-    const visitedUrl = publicUrl(run.sourceUrls[variable])?.href ?? null;
+    // where Kane said it read the passage AND the page of the step that stored it: both must be the cited page
+    const pages = [run.vars[`${variable}_url`], run.sourceUrls?.[variable]].filter(Boolean);
+    const visitedUrl = publicUrl(pages.find((u) => !samePage(u, claim.sourceUrl)) ?? pages[0])?.href ?? null;
     const expected = normalize(claim.quote);
     const matched = Boolean(run.status === "passed" && fresh && expected &&
-      samePage(visitedUrl, claim.sourceUrl) &&
+      pages.length > 0 && pages.every((u) => samePage(u, claim.sourceUrl)) &&
       normalize(foundText) !== "NOT FOUND" && normalize(foundText).includes(expected));
     return { claim: claim.claim, variable, sourceUrl: claim.sourceUrl, visitedUrl, foundText, matched };
   });
