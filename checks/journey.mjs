@@ -85,7 +85,7 @@ export default {
       const quote = norm(await page.locator("[data-demo=kane-quote]").first().innerText());
       const bound = await page.locator("[data-demo=final-claim][data-evidence]").count();
       const unverified = await page.locator("[data-demo=final-claim][data-verdict=unverified]").count();
-      if (bound + unverified < finals.length) throw new Error("a revised sentence has neither Kane evidence nor 'couldn't verify'");
+      if (bound + unverified < finals.length) throw new Error("a revised sentence has neither Kane evidence nor 'not stated on the site'");
       if (!quote) throw new Error("no Kane quote on the case");
       return `draft struck; ${finals.length} revised sentences (${bound} bound to Kane evidence, ${unverified} unverified)`;
     }),
@@ -94,15 +94,18 @@ export default {
     phone(async (page) => {
       const c = await latestCase();
       await page.goto(`${url}/case/${c.id}`, { waitUntil: "networkidle" });
-      const media = page.locator("[data-demo=briefing] video, [data-demo=briefing] audio").first();
-      await media.waitFor({ timeout: 15_000 });
-      const dur = await media.evaluate((m) => new Promise((res) => (m.readyState >= 1 ? res(m.duration) : m.addEventListener("loadedmetadata", () => res(m.duration)))));
-      if (!(dur >= 20 && dur <= 45)) throw new Error(`briefing is ${dur}s, not 20–45s`);
-      const captions = norm(await page.locator("[data-demo=captions]").innerText());
-      const finals = (await page.locator("[data-demo=final-claim]").allInnerTexts()).map(norm);
-      if (!finals.some((f) => captions.includes(f.slice(0, 30)))) throw new Error("captions aren't built from the revised sentences");
-      if (!/SEC/.test(captions) || !/20\d\d/.test(captions)) throw new Error("SEC notice not attributed with a date");
-      return `briefing ${Math.round(dur)}s with captions from the revised sentences`;
+      const rows = page.locator("[data-demo=report] [data-demo=claim-row]");
+      await rows.first().waitFor({ timeout: 15_000 });
+      const n = await rows.count();
+      for (let i = 0; i < n; i++) {
+        const r = rows.nth(i);
+        const hasShot = (await r.locator("[data-demo=kane-shot] img").count()) > 0;
+        const notStated = /not stated on the site/i.test(await r.innerText());
+        if (!hasShot && !notStated) throw new Error(`claim ${i + 1} has neither Kane's screenshot nor "not stated on the site"`);
+      }
+      const reg = norm(await page.locator("[data-demo=regulator]").innerText().catch(() => ""));
+      if (reg && !/20\d\d/.test(reg)) throw new Error("regulator notice shown without a date");
+      return `report lists ${n} claims, each with Kane's screenshot or "not stated on the site"`;
     }),
 
   J5: () =>
@@ -125,11 +128,11 @@ export default {
       const c = await latestCase();
       await page.goto(`${url}/case/${c.id}`, { waitUntil: "networkidle" });
       await page.getByRole("button", { name: /remove kane'?s receipt/i }).click({ timeout: 15_000 });
-      await page.getByText(/couldn.?t verify|no fit confirm/i).first().waitFor({ timeout: 15_000 });
+      await page.getByText(/not stated on the site/i).first().waitFor({ timeout: 15_000 });
       const share = page.getByRole("button", { name: /share/i }).first();
       if (await share.isEnabled()) throw new Error("Share still enabled without Kane's receipt: it's faked");
       const exp = page.getByRole("button", { name: /export|download/i }).first();
       if ((await exp.count()) && (await exp.isEnabled())) throw new Error("export still enabled without Kane's receipt");
-      return "without the receipt: 'couldn't verify', Share and export disabled";
+      return "without the receipt: 'not stated on the site', Share disabled";
     }),
 };

@@ -1,4 +1,4 @@
-// One case: forwarded message → agent draft → Kane reads the live site → agent rewrites from Kane only → Pidgin briefing.
+// One case: forwarded message → agent draft → Kane reads the live site → agent rewrites from Kane only → a fact report.
 // Every stage is written to data/cases/<id>/case.json as it happens, so the app can show progress.
 import { mkdirSync, writeFileSync, readFileSync, existsSync, copyFileSync } from "node:fs";
 import { join, dirname } from "node:path";
@@ -6,7 +6,6 @@ import { randomBytes } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import * as agent from "./agent.mjs";
 import { runKane, loadRun } from "./kane.mjs";
-import { speak } from "./voice.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 export const CASES = process.env.CASES_DIR ?? join(ROOT, "data/cases");
@@ -57,21 +56,9 @@ export async function createCase(message, { replay = null, onUpdate } = {}) {
 
     const { sentences } = await agent.rewrite(d, kane.vars);
     const bound = agent.bind(sentences, kane.vars, d).map((s) => ({ ...s, shot: s.bound ? kane.shots.byVar[s.evidence] : null }));
-    save({ stage: "voicing", sentences: bound });
-
-    const lines = [
-      { pidgin: `We send Kane, one browser agent, go read ${d.entity} website.`,
-        english: `We sent Kane, a browser agent, to read ${d.entity}'s website.` },
-      ...bound.filter((s) => s.bound).map((s) => ({ pidgin: s.pidgin, english: s.english })),
-      ...(bound.some((s) => !s.bound) ? [{
-        pidgin: `Dis ones we no see for di site at all: ${bound.filter((s) => !s.bound).map((s) => s.topic).join(", ")}.`,
-        english: `We found nothing on the site's public pages about: ${bound.filter((s) => !s.bound).map((s) => s.topic).join("; ")}.` }] : []),
-      ...(source ? [{ pidgin: `Nigeria SEC talk for ${pcmDate(source.date)} say ${source.entity} no get licence to collect investment for Nigeria.`,
-        english: `Nigeria's SEC said on ${enDate(source.date)} that ${source.entity} is not registered or licensed by the SEC to solicit investments in Nigeria.` }] : []),
-      { pidgin: "Shine your eye. Di proof dey di link.", english: "Be careful. The proof is in the link." },
-    ];
-    const voice = await speak(lines, caseDir(id));
-    save({ stage: "ready", briefing: voice });
+    const regulator = source ? { name: source.regulator, date: source.date, url: source.url, quote: source.quote,
+      text: `${source.regulator} (${enDate(source.date)}): ${source.entity} is not registered or licensed to solicit investments in Nigeria.` } : null;
+    save({ stage: "ready", sentences: bound, regulator });
   } catch (e) {
     save({ stage: "failed", error: String(e.message ?? e) });
   }
@@ -79,4 +66,3 @@ export async function createCase(message, { replay = null, onUpdate } = {}) {
 }
 
 const enDate = (d) => new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
-const pcmDate = (d) => new Date(d).toLocaleDateString("en-GB", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" });
