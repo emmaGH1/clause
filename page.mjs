@@ -39,7 +39,7 @@ const escape = (value) => String(value ?? "").replace(/[&<>"']/g, (ch) => ({
   "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
 })[ch]);
 
-function layout(body, refresh = false) {
+function layout(body, { mode = "report", refresh = false } = {}) {
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -47,20 +47,41 @@ function layout(body, refresh = false) {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   ${refresh ? '<meta http-equiv="refresh" content="2">' : ""}
   <title>${copy.name}</title>
-  <style>body { overflow-wrap: anywhere } img, textarea { max-width: 100%; box-sizing: border-box } img { height: auto } textarea { font: inherit } .pitch-text { white-space: pre-wrap }</style>
+  <meta name="theme-color" content="#180F25">
+  <link rel="stylesheet" href="/assets/clause.css">
+  <script type="module" src="/assets/clause.js"></script>
 </head>
-<body><main>${body}</main></body>
+<body class="${mode}">
+  <canvas class="paper-field" data-paper-field aria-hidden="true"></canvas>
+  <header class="masthead"><a class="wordmark" href="/" aria-label="Clause home"><span aria-hidden="true">[&gt;]</span> Clause</a></header>
+  <main>${body}</main>
+</body>
 </html>`;
 }
 
-export function home(error = "") {
-  return layout(`<h1>${copy.name}</h1>
-<form method="post" action="/cases" data-demo="app-ready">
+export function home(error = "", sample = null) {
+  const excerpt = sample?.message.match(/Your money[^.]*\.\s+Withdrawals are instant and free(?=,|\.)/i)?.[0];
+  const hero = sample && excerpt && !error ? `
+<section class="landing-hero">
+  <div class="landing-title">
+    <p class="pitch-label">The pitch</p>
+    <h1 class="glyph-title"><span>Instant</span><span>&amp; free.</span></h1>
+  </div>
+  <canvas class="receipt-art" data-receipt="/assets/receipt.webp" aria-hidden="true"></canvas>
+  <div class="landing-copy">
+    <p>${escape(excerpt)}.</p>
+    <a class="button primary" href="/case/${sample.id}?view=reading"><span aria-hidden="true">[</span> Check this pitch <span aria-hidden="true">→ ]</span></a>
+    <a class="paste-link" href="#paste">Paste your own <span aria-hidden="true">↘</span></a>
+  </div>
+</section>` : "";
+  return layout(`${hero}
+<form id="paste" class="paste-form" method="post" action="/cases" data-demo="app-ready">
+  <h${hero ? 2 : 1}>Check an investment pitch</h${hero ? 2 : 1}>
   ${error ? `<p role="alert">${escape(error)}</p>` : ""}
-  <label for="message">${copy.pitch}</label><br>
-  <textarea id="message" name="message" rows="6" cols="36" required maxlength="8000"></textarea><br>
-  <button type="submit">${copy.check}</button>
-</form>`);
+  <label for="message">${copy.pitch}</label>
+  <textarea id="message" name="message" rows="5" required maxlength="8000"></textarea>
+  <button class="button primary" type="submit" aria-label="${copy.check}"><span aria-hidden="true">[</span> Check <span aria-hidden="true">→ ]</span></button>
+</form>`, { mode: "landing" });
 }
 
 export function errorPage(status) {
@@ -99,7 +120,7 @@ export function report(c, { shared = false, offerRecheck = true, offerWrongPage 
   if (c.stage !== "ready") {
     const progress = c.kaneProgress?.filter(Boolean) ?? [];
     return layout(`${heading}<p role="status">${copy[c.stage]}</p>
-      ${progress.length ? `<ol>${progress.map((step) => `<li>${escape(step)}</li>`).join("")}</ol>` : ""}`, true);
+      ${progress.length ? `<ol>${progress.map((step) => `<li>${escape(step)}</li>`).join("")}</ol>` : ""}`, { refresh: true });
   }
 
   const recheck = c.recheck;
@@ -124,5 +145,5 @@ export function report(c, { shared = false, offerRecheck = true, offerWrongPage 
     ${!shared && offerRecheck && canRecheck(c) ? action(c, "recheck", copy.recheck) : ""}
     ${!shared ? action(c, "share", copy.share, "", !canShare(c)) : ""}
     <p><a href="/">${copy.newCheck}</a></p>
-  </article>`, recheck?.status === "running");
+  </article>`, { refresh: recheck?.status === "running" });
 }

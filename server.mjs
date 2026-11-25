@@ -7,6 +7,16 @@ import { canShare, canRecheck, caseDir, createCase, latestCase, readCase, rechec
 import { home, report, errorPage, errors } from "./page.mjs";
 
 const root = fileURLToPath(new URL(".", import.meta.url));
+const sampleId = "9f177adaf5e26b5d";
+const assetTypes = new Map([
+  ["clause.css", "text/css; charset=utf-8"],
+  ["clause.js", "text/javascript; charset=utf-8"],
+  ["glyph-mask.svg", "image/svg+xml"],
+  ["receipt.webp", "image/webp"],
+  ["fonts/ibm-plex-mono-400.woff2", "font/woff2"],
+  ["fonts/ibm-plex-mono-600.woff2", "font/woff2"],
+  ["fonts/space-mono-700.woff2", "font/woff2"],
+]);
 const commit = process.env.APP_COMMIT || gitCommit();
 const dev = process.env.NODE_ENV !== "production";
 const readReplay = dev && process.env.KANE_REPLAY_READ ? {
@@ -73,7 +83,15 @@ async function route(req, res) {
   const { pathname, searchParams } = new URL(req.url, "http://localhost");
   const get = req.method === "GET";
   const post = req.method === "POST";
-  if (get && pathname === "/") return send(res, 200, home());
+  if (get && pathname.startsWith("/assets/")) {
+    const asset = pathname.slice("/assets/".length);
+    const type = assetTypes.get(asset);
+    if (type) return serveFile(res, join(root, "assets", asset), type);
+  }
+  if (get && pathname === "/") {
+    const sample = existsSync(join(caseDir(sampleId), "case.json")) ? readCase(sampleId) : null;
+    return send(res, 200, home("", sample));
+  }
   if (get && pathname === "/version.json") return json(res, { commit });
   if (get && pathname === "/api/cases/latest") {
     const c = latestCase({ wrongPage: searchParams.get("variant") === "wrong-page" });
