@@ -1,1 +1,1 @@
-{"name":"shine-your-eye","private":true,"type":"module","scripts":{"status":"node scripts/status.mjs"},"devDependencies":{"playwright":"^1.49.1"}}
+{"name":"shine-your-eye","private":true,"type":"module","scripts":{"status":"node scripts/status.mjs","start":"node server.mjs","test":"node --test test/*.test.mjs"},"devDependencies":{"playwright":"^1.49.1"}}

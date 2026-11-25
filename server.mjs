@@ -1,0 +1,150 @@
+import { createServer } from "node:http";
+import { execFileSync } from "node:child_process";
+import { createReadStream, existsSync } from "node:fs";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { canShare, canRecheck, caseDir, createCase, latestCase, readCase, recheckCase, wrongPageCase } from "./engine/case.mjs";
+import { home, report, errorPage, errors } from "./page.mjs";
+
+const root = fileURLToPath(new URL(".", import.meta.url));
+const commit = process.env.APP_COMMIT || gitCommit();
+const dev = process.env.NODE_ENV !== "production";
+const readReplay = dev && process.env.KANE_REPLAY_READ ? {
+  raw: process.env.KANE_REPLAY_READ,
+  evidence: process.env.KANE_REPLAY_READ_EVIDENCE,
+} : null;
+const recheckReplay = dev ? process.env.KANE_RECHECK_REPLAY : null;
+const wrongPageReplay = dev ? process.env.KANE_RECHECK_WRONG_PAGE_REPLAY : null;
+const replayMode = Boolean(readReplay || recheckReplay || wrongPageReplay);
+
+function gitCommit() {
+  try {
+    return execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+  } catch {
+    return "unknown";
+  }
+}
+
+function send(res, status, body, type = "text/html; charset=utf-8") {
+  res.writeHead(status, { "Content-Type": type });
+  res.end(body);
+}
+
+function json(res, data, status = 200) {
+  send(res, status, JSON.stringify(data), "application/json; charset=utf-8");
+}
+
+function redirect(res, location) {
+  res.writeHead(303, { Location: location });
+  res.end();
+}
+
+function fail(res, status) {
+  send(res, status, errorPage(status));
+}
+
+async function form(req) {
+  let length = 0;
+  const chunks = [];
+  for await (const chunk of req) {
+    length += chunk.length;
+    if (length > 128 * 1024) return null;
+    chunks.push(chunk);
+  }
+  return new URLSearchParams(Buffer.concat(chunks).toString("utf8"));
+}
+
+function serveFile(res, file, type) {
+  if (!existsSync(file)) return fail(res, 404);
+  res.writeHead(200, { "Content-Type": type });
+  const stream = createReadStream(file);
+  stream.on("error", () => res.destroy());
+  res.on("close", () => stream.destroy());
+  stream.pipe(res);
+}
+
+function summary(c) {
+  const { id, stage, replay, site, sentences, recheck, wrongPage } = c;
+  const kane = c.kane && { runId: c.kane.runId, testUrl: c.kane.testUrl };
+  return { id, url: `/case/${id}`, stage, replay, site, sentences, kane, recheck, wrongPage };
+}
+
+async function route(req, res) {
+  const { pathname, searchParams } = new URL(req.url, "http://localhost");
+  const get = req.method === "GET";
+  const post = req.method === "POST";
+  if (get && pathname === "/") return send(res, 200, home());
+  if (get && pathname === "/version.json") return json(res, { commit });
+  if (get && pathname === "/api/cases/latest") {
+    const c = latestCase({ wrongPage: searchParams.get("variant") === "wrong-page" });
+    return c ? json(res, summary(c)) : json(res, { error: errors[404] }, 404);
+  }
+  if (post && pathname === "/cases") {
+    const message = (await form(req))?.get("message");
+    if (!message?.trim() || message.length > 8000) return send(res, 400, home(errors[400]));
+    if (replayMode && !readReplay) return fail(res, 409);
+    void createCase(message, {
+      replay: readReplay,
+      onUpdate(c) {
+        if (!res.headersSent) redirect(res, `/case/${c.id}`);
+      },
+    }).catch((error) => {
+      console.error(error.message);
+      if (!res.headersSent) fail(res, 500);
+    });
+    return;
+  }
+
+  const match = pathname.match(/^\/(case|share|api\/cases)\/([a-f0-9]{10,16})(?:\/(.*))?$/);
+  if (!match) return fail(res, 404);
+  const [, section, id, action] = match;
+  if (!existsSync(join(caseDir(id), "case.json"))) return fail(res, 404);
+  const c = readCase(id);
+  const replayFor = (wrongPage) => wrongPage ? wrongPageReplay : recheckReplay;
+  const allowRecheck = (wrongPage) => (!replayMode && !c.replay) || Boolean(replayFor(wrongPage));
+  if (get && section === "case" && !action) {
+    return send(res, 200, report(c, { offerRecheck: allowRecheck(Boolean(c.wrongPage)), offerWrongPage: allowRecheck(true) }));
+  }
+  if (get && section === "share" && !action) {
+    return canShare(c) ? send(res, 200, report(c, { shared: true })) : fail(res, 404);
+  }
+  if (get && section === "api/cases") {
+    const raw = action?.match(/^kane\/(read|recheck)\.ndjson$/);
+    if (raw) return serveFile(res, join(caseDir(id), `${raw[1]}.ndjson`), "application/x-ndjson; charset=utf-8");
+    const image = action?.match(/^shots\/(\d+)\.jpg$/);
+    const shot = image && c.sentences?.find(({ claim }) => claim === Number(image[1]))?.shot;
+    return shot ? serveFile(res, join(caseDir(id), shot), "image/jpeg") : fail(res, 404);
+  }
+  if (post && section === "case") {
+    if (action === "share") return canShare(c) ? redirect(res, `/share/${id}`) : fail(res, 409);
+    if (action === "recheck") {
+      const wrongPage = Boolean(c.wrongPage);
+      if (!allowRecheck(wrongPage) || !canRecheck(c)) return fail(res, 409);
+      const raw = replayFor(wrongPage);
+      void recheckCase(c, { replay: raw ? { raw } : null });
+      return redirect(res, `/case/${id}`);
+    }
+    if (action === "wrong-page") {
+      if (!allowRecheck(true) || c.format !== 1) return fail(res, 409);
+      const claim = Number((await form(req))?.get("claim"));
+      const variant = wrongPageCase(c, claim);
+      if (!variant) return fail(res, 409);
+      void recheckCase(variant, { replay: wrongPageReplay ? { raw: wrongPageReplay } : null });
+      return redirect(res, `/case/${variant.id}`);
+    }
+  }
+  return fail(res, 404);
+}
+
+const port = Number(process.env.PORT ?? 3000);
+createServer((req, res) => {
+  res.setHeader("Cache-Control", "no-store");
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("Referrer-Policy", "no-referrer");
+  res.setHeader("Content-Security-Policy", "default-src 'self'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'");
+  route(req, res).catch((error) => {
+    console.error(error.message);
+    if (!res.headersSent) fail(res, 500);
+    else res.destroy();
+  });
+}).listen(port, () => console.log(`Clause listening on port ${port}`));
