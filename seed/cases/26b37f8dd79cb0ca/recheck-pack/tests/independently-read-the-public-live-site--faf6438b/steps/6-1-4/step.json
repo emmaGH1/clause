@@ -1,0 +1,14 @@
+{
+  "kind": "analyze",
+  "status": "passed",
+  "summary": "analyze: the actual page URL is stored as {{r2_url}}",
+  "duration_ms": 12704.4,
+  "url": "https://www.mod-mountltd.com/en/faq/",
+  "action_id": "e842f64f-0968-43dc-8572-2aefcb6dcd13",
+  "analyze_action_ids": [
+    "c754572c-d4f9-456f-81ed-ce365590dd8a",
+    "e842f64f-0968-43dc-8572-2aefcb6dcd13"
+  ],
+  "ordinal": 6,
+  "id": "1-4"
+}

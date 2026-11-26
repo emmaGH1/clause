@@ -1,0 +1,10 @@
+{
+  "kind": "wait",
+  "status": "passed",
+  "summary": "wait: PRIMARY: confirm the expanded withdrawal FAQ answers remain visible for extracti",
+  "duration_ms": 6601.5,
+  "url": "https://www.mod-mountltd.com/en/faq/",
+  "action_id": "ef5fa3e0-7a66-4cae-bfba-2a9c440e81f2",
+  "ordinal": 7,
+  "id": "0-7"
+}

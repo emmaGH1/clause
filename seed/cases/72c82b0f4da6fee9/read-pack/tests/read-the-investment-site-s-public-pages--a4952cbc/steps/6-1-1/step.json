@@ -1,0 +1,16 @@
+{
+  "kind": "click",
+  "status": "passed",
+  "summary": "click: Opening ModMount withdrawal fees FAQ section",
+  "duration_ms": 5752.7,
+  "url": "https://www.mod-mountltd.com/en/faq/",
+  "action_id": "8457edc0-c7d2-47c6-a102-41a387e92a62",
+  "element_rect": {
+    "x": 995,
+    "y": 807,
+    "width": 484,
+    "height": 28
+  },
+  "ordinal": 6,
+  "id": "1-1"
+}

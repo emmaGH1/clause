@@ -24,7 +24,7 @@ const assetTypes = new Map([
   ["fonts/ibm-plex-mono-600.woff2", "font/woff2"],
   ["fonts/space-mono-700.woff2", "font/woff2"],
 ]);
-const commit = process.env.APP_COMMIT || gitCommit();
+const commit = process.env.APP_COMMIT || process.env.RAILWAY_GIT_COMMIT_SHA || gitCommit();
 const dev = process.env.NODE_ENV !== "production";
 const readReplay = dev && process.env.KANE_REPLAY_READ ? {
   raw: process.env.KANE_REPLAY_READ,

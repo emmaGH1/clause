@@ -1,0 +1,16 @@
+{
+  "kind": "click",
+  "status": "passed",
+  "summary": "click: Clicking What Are The Withdrawal Fees At Modmount link",
+  "duration_ms": 5060.6,
+  "url": "https://www.mod-mountltd.com/en/faq/",
+  "action_id": "e55e4b21-514b-484f-b59f-bce339680234",
+  "element_rect": {
+    "x": 995,
+    "y": 807,
+    "width": 484,
+    "height": 28
+  },
+  "ordinal": 5,
+  "id": "0-6"
+}

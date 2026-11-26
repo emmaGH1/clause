@@ -1,0 +1,16 @@
+{
+  "kind": "click",
+  "status": "passed",
+  "summary": "click: Clicking the Withdrawals FAQ question about the minimum withdrawal amount",
+  "duration_ms": 6688.4,
+  "url": "https://www.mod-mountltd.com/en/faq/",
+  "action_id": "b3e93e1b-9ba6-45cb-966c-b4ca3ca4ca8c",
+  "element_rect": {
+    "x": 995,
+    "y": 361,
+    "width": 484,
+    "height": 28
+  },
+  "ordinal": 4,
+  "id": "0-4"
+}

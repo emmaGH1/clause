@@ -1,0 +1,342 @@
+{
+  "format": 1,
+  "message": "Join ModMount today! Your money doubles in 2 weeks. Withdrawals are instant and free, and ModMount is licensed and safe. Sign up at https://www.mod-mountltd.com/en/",
+  "stage": "ready",
+  "replay": false,
+  "id": "9f177adaf5e26b5d",
+  "createdAt": "2026-11-25T19:35:55.814Z",
+  "updatedAt": "2026-11-25T20:11:34.670Z",
+  "draft": {
+    "url": "https://www.mod-mountltd.com/en/",
+    "entity": "ModMount",
+    "claims": [
+      {
+        "text": "Withdrawals are instant",
+        "question": "Does ModMount's site state how long withdrawals take to process, and do the withdrawal terms or conditions specify any delay, approval step, or minimum/maximum that contradicts \"instant\"?"
+      },
+      {
+        "text": "free",
+        "question": "Does ModMount's site list any fees for withdrawals, deposits, or other transactions (such as network, processing, or account fees), and does it confirm that withdrawals are free?"
+      },
+      {
+        "text": "Your money doubles in 2 weeks",
+        "question": "Does ModMount's site explain how a deposit doubles in 2 weeks, including the source of returns, any stated risk disclosures, and any conditions or guarantees on that return?"
+      }
+    ]
+  },
+  "site": {
+    "url": "https://www.mod-mountltd.com/en/",
+    "host": "www.mod-mountltd.com",
+    "defanged": "www[.]mod-mountltd[.]com"
+  },
+  "regulator": {
+    "name": "Securities and Exchange Commission, Nigeria",
+    "date": "2026-01-19",
+    "url": "https://home.sec.gov.ng/for-investors/keep-track-of-circulars/suspected-fraudulent-activities-of-modmount-services-limited/",
+    "quote": "The Commission hereby informs the public that ModMount Services Limited is not registered or licensed by the Commission to either solicit investments from the public or operate in any capacity within the Nigerian capital market."
+  },
+  "kaneProgress": [
+    "navigate: Navigate to https://www.mod-mountltd.com/en/",
+    "click: Clicking Help Center in the header navigation",
+    "scroll: Scrolling to the withdrawal processing time FAQ section",
+    "click: Clicking How Long Does It Take For My Withdrawal To Be Processed?",
+    "analyze: the answer is absent",
+    "click: Clicking What Are The Withdrawal Fees At Modmount?",
+    "analyze: the answer is absent",
+    "click: Clicking Continue to dismiss the cookie notice",
+    "analyze: the page URL is captured as {{c3_url}}",
+    "analyze: the literal \"NOT FOUND\" is stored as {{c3}}",
+    "wait: Waiting after required checkpoint verification",
+    "wait: Waiting 1000 ms after capturing all public-page findings"
+  ],
+  "kane": {
+    "status": "passed",
+    "runId": "602eadc4-56c2-458a-869b-462225667527",
+    "sessionDir": "/data/home/.testmuai/kaneai/sessions/602eadc4-56c2-458a-869b-462225667527",
+    "testUrl": "https://test-manager.lambdatest.com/projects/01M0H65XR6FT1JJA8SX5PXCGVT/test-cases/01M8A3AH77D329CTZPSR9FG56T/dashboard/share/US_RTGDCO1EO9AZ3FDO916ZCOY9YW0IWBLWAC63YFMD4EV0P4OCEHJ1E1JGPB5WN17K?type=summary&agentView=true&fqdn=summary-page",
+    "credits": 73.23034999999999,
+    "summary": "Reviewed ModMount’s public FAQ to check its withdrawal timing, withdrawal-fee, and claimed-return information without using account or payment features.\nThe FAQ states: “The withdrawal process takes about 8 to 10 business days to get your withdrawal request. Please note that it may differ depending on your local bank.” This does not support an “instant” withdrawal claim.\nThe FAQ states: “The Company reserves the right to charge a withdrawal fee depending on the circumstances. You can find all the relevant information in the General Fees document. Please review it carefully.” It therefore does not confirm that withdrawals are always free.\nNo public-page explanation was found for how a deposit doubles in two weeks, including the source of returns, risk disclosures, or any guarantee or conditions for that result.",
+    "vars": {
+      "c1": "The withdrawal process takes about 8 to 10 business days to get your withdrawal request. Please note that it may differ depending on your local bank.",
+      "c1_url": "https://www.mod-mountltd.com/en/faq/",
+      "c1_answer_absent": "true",
+      "c2": "The Company reserves the right to charge a withdrawal fee depending on the circumstances. You can find all the relevant information in the General Fees document. Please review it carefully.",
+      "c2_url": "https://www.mod-mountltd.com/en/faq/",
+      "c2_answer_absent": "true",
+      "c3_answer_absent": "false",
+      "c3": "NOT FOUND for the requested deposit-doubling explanation, source of returns, risk disclosures, and guarantees/conditions.",
+      "c3_url": "https://www.mod-mountltd.com/en/faq/"
+    },
+    "sourceUrls": {
+      "c1": "https://www.mod-mountltd.com/en/faq/",
+      "c1_answer_absent": "https://www.mod-mountltd.com/en/faq/",
+      "c2": "https://www.mod-mountltd.com/en/faq/",
+      "c2_answer_absent": "https://www.mod-mountltd.com/en/faq/",
+      "c3_answer_absent": "https://www.mod-mountltd.com/en/faq/",
+      "c3": "https://www.mod-mountltd.com/en/faq/"
+    },
+    "shots": {
+      "steps": [
+        {
+          "ordinal": 1,
+          "kind": "navigate",
+          "summary": "navigate: Navigate to https://www.mod-mountltd.com/en/",
+          "url": "https://www.mod-mountltd.com/en/",
+          "shot": "read-pack/tests/read-the-investment-site-s-public-pages--263dd2a0/steps/1-0-1/screenshot.jpg"
+        },
+        {
+          "ordinal": 2,
+          "kind": "click",
+          "summary": "click: Clicking Help Center in the header navigation",
+          "url": "https://www.mod-mountltd.com/en/",
+          "shot": "read-pack/tests/read-the-investment-site-s-public-pages--263dd2a0/steps/2-0-2/screenshot.jpg"
+        },
+        {
+          "ordinal": 3,
+          "kind": "scroll",
+          "summary": "scroll: Scrolling to the withdrawal processing time FAQ section",
+          "url": "https://www.mod-mountltd.com/en/faq/",
+          "shot": "read-pack/tests/read-the-investment-site-s-public-pages--263dd2a0/steps/3-0-3/screenshot.jpg"
+        },
+        {
+          "ordinal": 4,
+          "kind": "click",
+          "summary": "click: Clicking How Long Does It Take For My Withdrawal To Be Processed?",
+          "url": "https://www.mod-mountltd.com/en/faq/",
+          "shot": "read-pack/tests/read-the-investment-site-s-public-pages--263dd2a0/steps/4-0-4/screenshot.jpg"
+        },
+        {
+          "ordinal": 5,
+          "kind": "analyze",
+          "summary": "analyze: the answer is absent",
+          "url": "https://www.mod-mountltd.com/en/faq/",
+          "shot": "read-pack/tests/read-the-investment-site-s-public-pages--263dd2a0/steps/5-0-5/screenshot.jpg"
+        },
+        {
+          "ordinal": 6,
+          "kind": "click",
+          "summary": "click: Clicking What Are The Withdrawal Fees At Modmount?",
+          "url": "https://www.mod-mountltd.com/en/faq/",
+          "shot": "read-pack/tests/read-the-investment-site-s-public-pages--263dd2a0/steps/6-0-7/screenshot.jpg"
+        },
+        {
+          "ordinal": 7,
+          "kind": "analyze",
+          "summary": "analyze: the answer is absent",
+          "url": "https://www.mod-mountltd.com/en/faq/",
+          "shot": "read-pack/tests/read-the-investment-site-s-public-pages--263dd2a0/steps/7-0-8/screenshot.jpg"
+        },
+        {
+          "ordinal": 8,
+          "kind": "click",
+          "summary": "click: Clicking Continue to dismiss the cookie notice",
+          "url": "https://www.mod-mountltd.com/en/faq/",
+          "shot": "read-pack/tests/read-the-investment-site-s-public-pages--263dd2a0/steps/8-0-10/screenshot.jpg"
+        },
+        {
+          "ordinal": 9,
+          "kind": "analyze",
+          "summary": "analyze: the page URL is captured as {{c3_url}}",
+          "url": "https://www.mod-mountltd.com/en/faq/",
+          "shot": "read-pack/tests/read-the-investment-site-s-public-pages--263dd2a0/steps/9-0-11/screenshot.jpg"
+        },
+        {
+          "ordinal": 10,
+          "kind": "analyze",
+          "summary": "analyze: the literal \"NOT FOUND\" is stored as {{c3}}",
+          "url": "https://www.mod-mountltd.com/en/faq/",
+          "shot": "read-pack/tests/read-the-investment-site-s-public-pages--263dd2a0/steps/10-0-1bbc3fd8-1/screenshot.jpg"
+        },
+        {
+          "ordinal": 11,
+          "kind": "",
+          "summary": "wait: Waiting 1000 ms after capturing all public-page findings",
+          "url": "https://www.mod-mountltd.com/en/faq/",
+          "shot": "read-pack/tests/read-the-investment-site-s-public-pages--263dd2a0/steps/11-0-13/screenshot.jpg"
+        }
+      ],
+      "byVar": {
+        "c1": "read-pack/tests/read-the-investment-site-s-public-pages--263dd2a0/steps/5-0-5/screenshot.jpg",
+        "c1_url": "read-pack/tests/read-the-investment-site-s-public-pages--263dd2a0/steps/5-0-5/screenshot.jpg",
+        "c1_answer_absent": "read-pack/tests/read-the-investment-site-s-public-pages--263dd2a0/steps/5-0-5/screenshot.jpg",
+        "c2": "read-pack/tests/read-the-investment-site-s-public-pages--263dd2a0/steps/8-0-10/screenshot.jpg",
+        "c2_url": "read-pack/tests/read-the-investment-site-s-public-pages--263dd2a0/steps/8-0-10/screenshot.jpg",
+        "c2_answer_absent": "read-pack/tests/read-the-investment-site-s-public-pages--263dd2a0/steps/8-0-10/screenshot.jpg",
+        "c3_answer_absent": "read-pack/tests/read-the-investment-site-s-public-pages--263dd2a0/steps/11-0-13/screenshot.jpg",
+        "c3": "read-pack/tests/read-the-investment-site-s-public-pages--263dd2a0/steps/11-0-13/screenshot.jpg",
+        "c3_url": "read-pack/tests/read-the-investment-site-s-public-pages--263dd2a0/steps/11-0-13/screenshot.jpg"
+      },
+      "pageByVar": {
+        "c1": "https://www.mod-mountltd.com/en/faq/",
+        "c1_url": "https://www.mod-mountltd.com/en/faq/",
+        "c1_answer_absent": "https://www.mod-mountltd.com/en/faq/",
+        "c2": "https://www.mod-mountltd.com/en/faq/",
+        "c2_url": "https://www.mod-mountltd.com/en/faq/",
+        "c2_answer_absent": "https://www.mod-mountltd.com/en/faq/",
+        "c3_answer_absent": "https://www.mod-mountltd.com/en/faq/",
+        "c3": "https://www.mod-mountltd.com/en/faq/",
+        "c3_url": "https://www.mod-mountltd.com/en/faq/"
+      }
+    },
+    "steps": [
+      {
+        "ordinal": 1,
+        "kind": "navigate",
+        "summary": "navigate: Navigate to https://www.mod-mountltd.com/en/",
+        "url": "https://www.mod-mountltd.com/en/",
+        "shot": "read-pack/tests/read-the-investment-site-s-public-pages--263dd2a0/steps/1-0-1/screenshot.jpg"
+      },
+      {
+        "ordinal": 2,
+        "kind": "click",
+        "summary": "click: Clicking Help Center in the header navigation",
+        "url": "https://www.mod-mountltd.com/en/",
+        "shot": "read-pack/tests/read-the-investment-site-s-public-pages--263dd2a0/steps/2-0-2/screenshot.jpg"
+      },
+      {
+        "ordinal": 3,
+        "kind": "scroll",
+        "summary": "scroll: Scrolling to the withdrawal processing time FAQ section",
+        "url": "https://www.mod-mountltd.com/en/faq/",
+        "shot": "read-pack/tests/read-the-investment-site-s-public-pages--263dd2a0/steps/3-0-3/screenshot.jpg"
+      },
+      {
+        "ordinal": 4,
+        "kind": "click",
+        "summary": "click: Clicking How Long Does It Take For My Withdrawal To Be Processed?",
+        "url": "https://www.mod-mountltd.com/en/faq/",
+        "shot": "read-pack/tests/read-the-investment-site-s-public-pages--263dd2a0/steps/4-0-4/screenshot.jpg"
+      },
+      {
+        "ordinal": 5,
+        "kind": "analyze",
+        "summary": "analyze: the answer is absent",
+        "url": "https://www.mod-mountltd.com/en/faq/",
+        "shot": "read-pack/tests/read-the-investment-site-s-public-pages--263dd2a0/steps/5-0-5/screenshot.jpg"
+      },
+      {
+        "ordinal": 6,
+        "kind": "click",
+        "summary": "click: Clicking What Are The Withdrawal Fees At Modmount?",
+        "url": "https://www.mod-mountltd.com/en/faq/",
+        "shot": "read-pack/tests/read-the-investment-site-s-public-pages--263dd2a0/steps/6-0-7/screenshot.jpg"
+      },
+      {
+        "ordinal": 7,
+        "kind": "analyze",
+        "summary": "analyze: the answer is absent",
+        "url": "https://www.mod-mountltd.com/en/faq/",
+        "shot": "read-pack/tests/read-the-investment-site-s-public-pages--263dd2a0/steps/7-0-8/screenshot.jpg"
+      },
+      {
+        "ordinal": 8,
+        "kind": "click",
+        "summary": "click: Clicking Continue to dismiss the cookie notice",
+        "url": "https://www.mod-mountltd.com/en/faq/",
+        "shot": "read-pack/tests/read-the-investment-site-s-public-pages--263dd2a0/steps/8-0-10/screenshot.jpg"
+      },
+      {
+        "ordinal": 9,
+        "kind": "analyze",
+        "summary": "analyze: the page URL is captured as {{c3_url}}",
+        "url": "https://www.mod-mountltd.com/en/faq/",
+        "shot": "read-pack/tests/read-the-investment-site-s-public-pages--263dd2a0/steps/9-0-11/screenshot.jpg"
+      },
+      {
+        "ordinal": 10,
+        "kind": "analyze",
+        "summary": "analyze: the literal \"NOT FOUND\" is stored as {{c3}}",
+        "url": "https://www.mod-mountltd.com/en/faq/",
+        "shot": "read-pack/tests/read-the-investment-site-s-public-pages--263dd2a0/steps/10-0-1bbc3fd8-1/screenshot.jpg"
+      },
+      {
+        "ordinal": 11,
+        "kind": "",
+        "summary": "wait: Waiting 1000 ms after capturing all public-page findings",
+        "url": "https://www.mod-mountltd.com/en/faq/",
+        "shot": "read-pack/tests/read-the-investment-site-s-public-pages--263dd2a0/steps/11-0-13/screenshot.jpg"
+      }
+    ],
+    "capturedAt": "2026-11-25T19:39:40.022Z"
+  },
+  "sentences": [
+    {
+      "claim": 1,
+      "text": "Withdrawals are instant",
+      "bound": true,
+      "verdict": "corrected",
+      "evidence": "c1",
+      "quote": "The withdrawal process takes about 8 to 10 business days to get your withdrawal request. Please note that it may differ depending on your local bank.",
+      "shot": "read-pack/tests/read-the-investment-site-s-public-pages--263dd2a0/steps/5-0-5/screenshot.jpg",
+      "sourceUrl": "https://www.mod-mountltd.com/en/faq/"
+    },
+    {
+      "claim": 2,
+      "text": "free",
+      "bound": true,
+      "verdict": "corrected",
+      "evidence": "c2",
+      "quote": "The Company reserves the right to charge a withdrawal fee depending on the circumstances. You can find all the relevant information in the General Fees document. Please review it carefully.",
+      "shot": "read-pack/tests/read-the-investment-site-s-public-pages--263dd2a0/steps/8-0-10/screenshot.jpg",
+      "sourceUrl": "https://www.mod-mountltd.com/en/faq/"
+    },
+    {
+      "claim": 3,
+      "text": "Your money doubles in 2 weeks",
+      "bound": false,
+      "verdict": "unverified",
+      "english": "Kane couldn't find this on the pages it checked"
+    }
+  ],
+  "recheckHistory": [
+    {
+      "runId": "3c8bdefa-1bf1-4abb-a4d4-0375781f4fb2",
+      "status": "failed",
+      "perClaim": [
+        {
+          "claim": 1,
+          "variable": "r1",
+          "sourceUrl": "https://www.mod-mountltd.com/en/faq/",
+          "visitedUrl": "https://www.mod-mountltd.com/en/faq/",
+          "foundText": "The minimum withdrawal amount from your Modmount account is 10 EUR/ USD (or equivalent, based on account currency) for Wire Transfer. If you use e-wallets, you may withdraw any amount as long as it covers the fee.",
+          "matched": false
+        },
+        {
+          "claim": 2,
+          "variable": "r2",
+          "sourceUrl": "https://www.mod-mountltd.com/en/faq/",
+          "visitedUrl": null,
+          "foundText": "",
+          "matched": false
+        }
+      ],
+      "replay": false,
+      "raw": "recheck-attempt1.ndjson",
+      "note": "Kane opened several FAQ accordions and copied the wrong answer; objective fixed in b47fc2b"
+    }
+  ],
+  "recheck": {
+    "runId": "d48432e4-b1f3-4562-b9c3-0ad79c963c21",
+    "status": "passed",
+    "perClaim": [
+      {
+        "claim": 1,
+        "variable": "r1",
+        "sourceUrl": "https://www.mod-mountltd.com/en/faq/",
+        "visitedUrl": "https://www.mod-mountltd.com/en/faq/",
+        "foundText": "The withdrawal process takes about 8 to 10 business days to get your withdrawal request. Please note that it may differ depending on your local bank.",
+        "matched": true
+      },
+      {
+        "claim": 2,
+        "variable": "r2",
+        "sourceUrl": "https://www.mod-mountltd.com/en/faq/",
+        "visitedUrl": "https://www.mod-mountltd.com/en/faq/",
+        "foundText": "The Company reserves the right to charge a withdrawal fee depending on the circumstances. You can find all the relevant information in the General Fees document. Please review it carefully.",
+        "matched": true
+      }
+    ],
+    "replay": false,
+    "rescored": "2026-11-25T20:14:40.744Z"
+  }
+}

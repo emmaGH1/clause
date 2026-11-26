@@ -1,0 +1,16 @@
+{
+  "kind": "click",
+  "status": "passed",
+  "summary": "click: Clicking Help Center in the top navigation",
+  "duration_ms": 5708.6,
+  "url": "https://www.mod-mountltd.com/en/",
+  "action_id": "65cc5f67-81ba-4ff7-a801-22925ff81aa5",
+  "element_rect": {
+    "x": 1306,
+    "y": 148,
+    "width": 82,
+    "height": 24
+  },
+  "ordinal": 2,
+  "id": "0-2"
+}

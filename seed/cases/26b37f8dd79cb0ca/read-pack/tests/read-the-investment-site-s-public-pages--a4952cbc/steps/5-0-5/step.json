@@ -1,0 +1,15 @@
+{
+  "kind": "analyze",
+  "status": "passed",
+  "summary": "analyze: the answer is absent",
+  "duration_ms": 29033.9,
+  "url": "https://www.mod-mountltd.com/en/faq/",
+  "action_id": "9ef436b9-f94d-4bb9-a99c-a87133d3c794",
+  "analyze_action_ids": [
+    "2a34792e-a3a9-4da5-ba6b-6d420ea44d0d",
+    "5b7e4ce3-f969-4ac6-acea-5101cf8e3584",
+    "9ef436b9-f94d-4bb9-a99c-a87133d3c794"
+  ],
+  "ordinal": 5,
+  "id": "0-5"
+}

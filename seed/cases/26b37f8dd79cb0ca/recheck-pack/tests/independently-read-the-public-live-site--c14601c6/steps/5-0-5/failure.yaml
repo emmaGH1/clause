@@ -1,0 +1,35 @@
+step: 0-5
+status: broken
+error:
+  message: The live current page’s DOM and text contain no requested passage, so it
+    cannot be copied verbatim.
+page_state:
+  url: https://www.mod-mountltd.com/en/
+  screenshot: steps/5-0-5/screenshot.jpg
+console_at_failure:
+  ref: logs/0-console.ndjson
+  step: 0-5
+network_at_failure:
+  ref: logs/0-network.har
+  step: 0-5
+title: Withdrawal FAQ expectation is stale
+triage:
+  status: triaged
+  by:
+    kind: agent
+    id: v16-investigation/terminal
+    at: '2026-11-26T12:59:25.686601+00:00'
+  rca:
+    root_cause: The test expected old or incorrect page content. The current page
+      was reached successfully and the agent searched it, but the requested passage
+      was absent. The task's own fallback required recording NOT FOUND when that happens,
+      so asserting that the passage had to be copied made the run fail.
+    category: automation_bug/test_data_issue
+    confidence: 0.98
+  verification:
+    status: not_verified
+  severity: minor
+  suggested_fix:
+    summary: Update the test fixture to expect r1 = NOT FOUND for this URL, or revise
+      the target URL and expected passage after confirming where the withdrawal FAQ
+      is currently published.

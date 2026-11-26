@@ -1,0 +1,16 @@
+{
+  "kind": "scroll",
+  "status": "passed",
+  "summary": "scroll: Scrolling the Withdrawals FAQ section for ModMount withdrawal fee details",
+  "duration_ms": 7234.6,
+  "url": "https://www.mod-mountltd.com/en/faq/",
+  "action_id": "0f40d918-7735-4d66-8615-bf43890e3f9f",
+  "element_rect": {
+    "x": 995,
+    "y": 879,
+    "width": 484,
+    "height": 84
+  },
+  "ordinal": 7,
+  "id": "1-2"
+}

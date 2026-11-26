@@ -1,0 +1,378 @@
+{
+  "format": 1,
+  "message": "Join ModMount today! Your money doubles in 2 weeks. Withdrawals are instant and free, and ModMount is licensed and safe. Sign up at https://www.mod-mountltd.com/en/",
+  "stage": "ready",
+  "replay": false,
+  "draft": {
+    "url": "https://www.mod-mountltd.com/en/",
+    "entity": "ModMount",
+    "claims": [
+      {
+        "text": "Withdrawals are instant",
+        "question": "Does ModMount's website state how long withdrawals take to process, and does it say withdrawals are instant, or are there pending periods, approval steps, or conditions?"
+      },
+      {
+        "text": "free",
+        "question": "Does ModMount's website list any fees for withdrawals, deposits, or other transactions, or confirm that withdrawals are free?"
+      },
+      {
+        "text": "Your money doubles in 2 weeks",
+        "question": "Does ModMount's website explain how money doubles in 2 weeks, state a guaranteed return, or include risk disclosures and conditions on returns?"
+      }
+    ]
+  },
+  "site": {
+    "url": "https://www.mod-mountltd.com/en/",
+    "host": "www.mod-mountltd.com",
+    "defanged": "www[.]mod-mountltd[.]com"
+  },
+  "regulator": {
+    "name": "Securities and Exchange Commission, Nigeria",
+    "date": "2026-01-19",
+    "url": "https://home.sec.gov.ng/for-investors/keep-track-of-circulars/suspected-fraudulent-activities-of-modmount-services-limited/",
+    "quote": "The Commission hereby informs the public that ModMount Services Limited is not registered or licensed by the Commission to either solicit investments from the public or operate in any capacity within the Nigerian capital market."
+  },
+  "kaneProgress": [
+    "navigate: Navigate to https://www.mod-mountltd.com/en/",
+    "click: Clicking Help Center in the top navigation",
+    "scroll: Scrolling to investigate withdrawal processing time on ModMount FAQ",
+    "click: Clicking How Long Does It Take For My Withdrawal To Be Processed?",
+    "analyze: the answer is absent",
+    "wait: Waiting after confirming the visible withdrawal-processing FAQ passage",
+    "click: Opening ModMount withdrawal fees FAQ section",
+    "scroll: Scrolling the Withdrawals FAQ section for ModMount withdrawal fee details",
+    "analyze: the answer is absent",
+    "analyze: the literal \"NOT FOUND\" is stored as {{c2}}",
+    "wait: Waiting after completing the required checkpoint",
+    "wait: PRIMARY: keep a screenshot of the same visible passage that answers the claim qu",
+    "analyze: ANALYZE(url, 'the URL of the page showing the passage (the current page, after a",
+    "wait: Waiting after capturing the visible ModMount withdrawal-fees FAQ passage and verifying its text and URL",
+    "scroll: Scrolling to the risk warning in the footer",
+    "analyze: the answer is absent",
+    "analyze: ANALYZE(textual_visual, 'The answer text under a single FAQ question or a single",
+    "analyze: ANALYZE(url, 'The URL of the page showing the visible passage (the current page,",
+    "wait: Waiting after confirming the visible risk-warning passage and stored FAQ URL"
+  ],
+  "kane": {
+    "status": "passed",
+    "runId": "3a6f4082-4519-4cd3-abc7-f62d32257297",
+    "sessionDir": "/data/home/.testmuai/kaneai/sessions/3a6f4082-4519-4cd3-abc7-f62d32257297",
+    "testUrl": "https://test-manager.lambdatest.com/projects/01M8A58NXY420Q922JNKQYXKD2/test-cases/01M8BYG0YYKYG7D2M8RV2B8F0F/dashboard/share/US_U5BSDOCFNQ3RFIKN3AAK5YLXMPP9FAQN3SMJFIQLS6KU9WZGP51S8XLBUQRM2GUE?type=summary&agentView=true&fqdn=summary-page",
+    "credits": 102.50642249999999,
+    "summary": "Reviewed ModMount’s public FAQ page to find its stated withdrawal-processing information.\nOpened the withdrawal timing FAQ and kept the answer visible while capturing it.\nThe FAQ states: “The withdrawal process takes about 8 to 10 business days to get your withdrawal request. Please note that it may differ depending on your local bank.”\nThis indicates withdrawals are not described as instant; the stated timeframe may vary by local bank. The captured passage does not mention approval steps or other conditions.",
+    "vars": {
+      "c1_url": "https://www.mod-mountltd.com/en/faq/",
+      "c1": "The withdrawal process takes about 8 to 10 business days to get your withdrawal request. Please note that it may differ depending on your local bank.",
+      "answer_absent": "false",
+      "c2": "The Company reserves the right to charge a withdrawal fee depending on the circumstances. You can find all the relevant information in the General Fees document. Please review it carefully.",
+      "c2_url": "https://www.mod-mountltd.com/en/faq/",
+      "answer_absent_check": "true",
+      "c3": "The withdrawal process takes about 8 to 10 business days to get your withdrawal request. Please note that it may differ depending on your local bank.",
+      "c3_url": "https://www.mod-mountltd.com/en/faq/"
+    },
+    "sourceUrls": {
+      "c1": "https://www.mod-mountltd.com/en/faq/",
+      "answer_absent": "https://www.mod-mountltd.com/en/faq/",
+      "c2": "https://www.mod-mountltd.com/en/faq/",
+      "answer_absent_check": "https://www.mod-mountltd.com/en/",
+      "c3": "https://www.mod-mountltd.com/en/faq/"
+    },
+    "shots": {
+      "steps": [
+        {
+          "ordinal": 1,
+          "kind": "navigate",
+          "summary": "navigate: Navigate to https://www.mod-mountltd.com/en/",
+          "url": "https://www.mod-mountltd.com/en/",
+          "shot": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/1-0-1/screenshot.jpg"
+        },
+        {
+          "ordinal": 2,
+          "kind": "click",
+          "summary": "click: Clicking Help Center in the top navigation",
+          "url": "https://www.mod-mountltd.com/en/",
+          "shot": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/2-0-2/screenshot.jpg"
+        },
+        {
+          "ordinal": 3,
+          "kind": "scroll",
+          "summary": "scroll: Scrolling to investigate withdrawal processing time on ModMount FAQ",
+          "url": "https://www.mod-mountltd.com/en/faq/",
+          "shot": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/3-0-3/screenshot.jpg"
+        },
+        {
+          "ordinal": 4,
+          "kind": "click",
+          "summary": "click: Clicking How Long Does It Take For My Withdrawal To Be Processed?",
+          "url": "https://www.mod-mountltd.com/en/faq/",
+          "shot": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/4-0-4/screenshot.jpg"
+        },
+        {
+          "ordinal": 5,
+          "kind": "analyze",
+          "summary": "analyze: the answer is absent",
+          "url": "https://www.mod-mountltd.com/en/faq/",
+          "shot": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/5-0-5/screenshot.jpg"
+        },
+        {
+          "ordinal": 6,
+          "kind": "click",
+          "summary": "click: Opening ModMount withdrawal fees FAQ section",
+          "url": "https://www.mod-mountltd.com/en/faq/",
+          "shot": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/6-1-1/screenshot.jpg"
+        },
+        {
+          "ordinal": 7,
+          "kind": "scroll",
+          "summary": "scroll: Scrolling the Withdrawals FAQ section for ModMount withdrawal fee details",
+          "url": "https://www.mod-mountltd.com/en/faq/",
+          "shot": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/7-1-2/screenshot.jpg"
+        },
+        {
+          "ordinal": 8,
+          "kind": "analyze",
+          "summary": "analyze: the answer is absent",
+          "url": "https://www.mod-mountltd.com/en/faq/",
+          "shot": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/8-1-3/screenshot.jpg"
+        },
+        {
+          "ordinal": 9,
+          "kind": "analyze",
+          "summary": "analyze: the literal \"NOT FOUND\" is stored as {{c2}}",
+          "url": "https://www.mod-mountltd.com/en/faq/",
+          "shot": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/9-1-e1076ccf-1/screenshot.jpg"
+        },
+        {
+          "ordinal": 10,
+          "kind": "wait",
+          "summary": "wait: PRIMARY: keep a screenshot of the same visible passage that answers the claim qu",
+          "url": "https://www.mod-mountltd.com/en/faq/",
+          "shot": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/10-1-5/screenshot.jpg"
+        },
+        {
+          "ordinal": 11,
+          "kind": "analyze",
+          "summary": "analyze: ANALYZE(url, 'the URL of the page showing the passage (the current page, after a",
+          "url": "https://www.mod-mountltd.com/en/faq/",
+          "shot": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/11-1-6/screenshot.jpg"
+        },
+        {
+          "ordinal": 12,
+          "kind": "scroll",
+          "summary": "scroll: Scrolling to the risk warning in the footer",
+          "url": "https://www.mod-mountltd.com/en/faq/",
+          "shot": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/12-2-1/screenshot.jpg"
+        },
+        {
+          "ordinal": 13,
+          "kind": "analyze",
+          "summary": "analyze: the answer is absent",
+          "url": "https://www.mod-mountltd.com/en/faq/",
+          "shot": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/13-2-2/screenshot.jpg"
+        },
+        {
+          "ordinal": 14,
+          "kind": "analyze",
+          "summary": "analyze: ANALYZE(textual_visual, 'The answer text under a single FAQ question or a single",
+          "url": "https://www.mod-mountltd.com/en/faq/",
+          "shot": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/14-2-4/screenshot.jpg"
+        },
+        {
+          "ordinal": 15,
+          "kind": "analyze",
+          "summary": "analyze: ANALYZE(url, 'The URL of the page showing the visible passage (the current page,",
+          "url": "https://www.mod-mountltd.com/en/faq/",
+          "shot": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/15-2-5/screenshot.jpg"
+        }
+      ],
+      "byVar": {
+        "c1_url": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/5-0-5/screenshot.jpg",
+        "c1": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/5-0-5/screenshot.jpg",
+        "answer_absent": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/3-0-3/screenshot.jpg",
+        "c2": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/6-1-1/screenshot.jpg",
+        "c2_url": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/6-1-1/screenshot.jpg",
+        "answer_absent_check": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/2-0-2/screenshot.jpg",
+        "c3": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/4-0-4/screenshot.jpg",
+        "c3_url": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/5-0-5/screenshot.jpg"
+      },
+      "pageByVar": {
+        "c1_url": "https://www.mod-mountltd.com/en/faq/",
+        "c1": "https://www.mod-mountltd.com/en/faq/",
+        "answer_absent": "https://www.mod-mountltd.com/en/faq/",
+        "c2": "https://www.mod-mountltd.com/en/faq/",
+        "c2_url": "https://www.mod-mountltd.com/en/faq/",
+        "answer_absent_check": "https://www.mod-mountltd.com/en/",
+        "c3": "https://www.mod-mountltd.com/en/faq/",
+        "c3_url": "https://www.mod-mountltd.com/en/faq/"
+      }
+    },
+    "steps": [
+      {
+        "ordinal": 1,
+        "kind": "navigate",
+        "summary": "navigate: Navigate to https://www.mod-mountltd.com/en/",
+        "url": "https://www.mod-mountltd.com/en/",
+        "shot": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/1-0-1/screenshot.jpg"
+      },
+      {
+        "ordinal": 2,
+        "kind": "click",
+        "summary": "click: Clicking Help Center in the top navigation",
+        "url": "https://www.mod-mountltd.com/en/",
+        "shot": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/2-0-2/screenshot.jpg"
+      },
+      {
+        "ordinal": 3,
+        "kind": "scroll",
+        "summary": "scroll: Scrolling to investigate withdrawal processing time on ModMount FAQ",
+        "url": "https://www.mod-mountltd.com/en/faq/",
+        "shot": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/3-0-3/screenshot.jpg"
+      },
+      {
+        "ordinal": 4,
+        "kind": "click",
+        "summary": "click: Clicking How Long Does It Take For My Withdrawal To Be Processed?",
+        "url": "https://www.mod-mountltd.com/en/faq/",
+        "shot": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/4-0-4/screenshot.jpg"
+      },
+      {
+        "ordinal": 5,
+        "kind": "analyze",
+        "summary": "analyze: the answer is absent",
+        "url": "https://www.mod-mountltd.com/en/faq/",
+        "shot": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/5-0-5/screenshot.jpg"
+      },
+      {
+        "ordinal": 6,
+        "kind": "click",
+        "summary": "click: Opening ModMount withdrawal fees FAQ section",
+        "url": "https://www.mod-mountltd.com/en/faq/",
+        "shot": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/6-1-1/screenshot.jpg"
+      },
+      {
+        "ordinal": 7,
+        "kind": "scroll",
+        "summary": "scroll: Scrolling the Withdrawals FAQ section for ModMount withdrawal fee details",
+        "url": "https://www.mod-mountltd.com/en/faq/",
+        "shot": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/7-1-2/screenshot.jpg"
+      },
+      {
+        "ordinal": 8,
+        "kind": "analyze",
+        "summary": "analyze: the answer is absent",
+        "url": "https://www.mod-mountltd.com/en/faq/",
+        "shot": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/8-1-3/screenshot.jpg"
+      },
+      {
+        "ordinal": 9,
+        "kind": "analyze",
+        "summary": "analyze: the literal \"NOT FOUND\" is stored as {{c2}}",
+        "url": "https://www.mod-mountltd.com/en/faq/",
+        "shot": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/9-1-e1076ccf-1/screenshot.jpg"
+      },
+      {
+        "ordinal": 10,
+        "kind": "wait",
+        "summary": "wait: PRIMARY: keep a screenshot of the same visible passage that answers the claim qu",
+        "url": "https://www.mod-mountltd.com/en/faq/",
+        "shot": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/10-1-5/screenshot.jpg"
+      },
+      {
+        "ordinal": 11,
+        "kind": "analyze",
+        "summary": "analyze: ANALYZE(url, 'the URL of the page showing the passage (the current page, after a",
+        "url": "https://www.mod-mountltd.com/en/faq/",
+        "shot": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/11-1-6/screenshot.jpg"
+      },
+      {
+        "ordinal": 12,
+        "kind": "scroll",
+        "summary": "scroll: Scrolling to the risk warning in the footer",
+        "url": "https://www.mod-mountltd.com/en/faq/",
+        "shot": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/12-2-1/screenshot.jpg"
+      },
+      {
+        "ordinal": 13,
+        "kind": "analyze",
+        "summary": "analyze: the answer is absent",
+        "url": "https://www.mod-mountltd.com/en/faq/",
+        "shot": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/13-2-2/screenshot.jpg"
+      },
+      {
+        "ordinal": 14,
+        "kind": "analyze",
+        "summary": "analyze: ANALYZE(textual_visual, 'The answer text under a single FAQ question or a single",
+        "url": "https://www.mod-mountltd.com/en/faq/",
+        "shot": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/14-2-4/screenshot.jpg"
+      },
+      {
+        "ordinal": 15,
+        "kind": "analyze",
+        "summary": "analyze: ANALYZE(url, 'The URL of the page showing the visible passage (the current page,",
+        "url": "https://www.mod-mountltd.com/en/faq/",
+        "shot": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/15-2-5/screenshot.jpg"
+      }
+    ],
+    "capturedAt": "2026-11-26T12:54:57.830Z"
+  },
+  "sentences": [
+    {
+      "claim": 1,
+      "text": "Withdrawals are instant",
+      "bound": true,
+      "verdict": "corrected",
+      "evidence": "c1",
+      "quote": "The withdrawal process takes about 8 to 10 business days to get your withdrawal request. Please note that it may differ depending on your local bank.",
+      "shot": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/5-0-5/screenshot.jpg",
+      "sourceUrl": "https://www.mod-mountltd.com/en/"
+    },
+    {
+      "claim": 2,
+      "text": "free",
+      "bound": true,
+      "verdict": "corrected",
+      "evidence": "c2",
+      "quote": "The Company reserves the right to charge a withdrawal fee depending on the circumstances. You can find all the relevant information in the General Fees document. Please review it carefully.",
+      "shot": "read-pack/tests/read-the-investment-site-s-public-pages--a4952cbc/steps/6-1-1/screenshot.jpg",
+      "sourceUrl": "https://www.mod-mountltd.com/en/faq/"
+    },
+    {
+      "claim": 3,
+      "text": "Your money doubles in 2 weeks",
+      "bound": false,
+      "verdict": "unverified",
+      "english": "Kane couldn't find this on the pages it checked"
+    }
+  ],
+  "wrongPage": {
+    "from": "72c82b0f4da6fee9",
+    "claim": 1,
+    "originalUrl": "https://www.mod-mountltd.com/en/faq/"
+  },
+  "id": "26b37f8dd79cb0ca",
+  "createdAt": "2026-11-26T12:57:56.245Z",
+  "updatedAt": "2026-11-26T13:02:01.178Z",
+  "recheck": {
+    "runId": "9bb7bb26-f80e-449f-8e20-54986c7c3535",
+    "status": "failed",
+    "perClaim": [
+      {
+        "claim": 1,
+        "variable": "r1",
+        "sourceUrl": "https://www.mod-mountltd.com/en/",
+        "visitedUrl": "https://www.mod-mountltd.com/en/",
+        "foundText": "NOT FOUND",
+        "matched": false
+      },
+      {
+        "claim": 2,
+        "variable": "r2",
+        "sourceUrl": "https://www.mod-mountltd.com/en/faq/",
+        "visitedUrl": "https://www.mod-mountltd.com/en/faq/",
+        "foundText": "",
+        "matched": false
+      }
+    ],
+    "replay": false
+  }
+}

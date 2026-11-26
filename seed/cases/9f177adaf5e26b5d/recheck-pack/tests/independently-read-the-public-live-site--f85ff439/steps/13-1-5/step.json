@@ -1,0 +1,10 @@
+{
+  "kind": "wait",
+  "status": "passed",
+  "summary": "wait: PRIMARY: Inspect the current page and answer: \"Does ModMount's site list any fee",
+  "duration_ms": 6950.8,
+  "url": "https://www.mod-mountltd.com/en/faq/",
+  "action_id": "7da73f84-2424-4534-9bf3-be51c4036c87",
+  "ordinal": 13,
+  "id": "1-5"
+}

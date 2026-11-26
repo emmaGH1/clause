@@ -1,0 +1,14 @@
+{
+  "kind": "analyze",
+  "status": "passed",
+  "summary": "analyze: ANALYZE(textual_visual, \"A visible answer passage addresses whether ModMount's s",
+  "duration_ms": 19005.8,
+  "url": "https://www.mod-mountltd.com/en/faq/",
+  "action_id": "a973aa5d-803e-4cb5-9026-5d93976a7d3f",
+  "analyze_action_ids": [
+    "b7000fa7-a96b-47dc-81b9-2541a64dd766",
+    "a973aa5d-803e-4cb5-9026-5d93976a7d3f"
+  ],
+  "ordinal": 14,
+  "id": "1-6"
+}

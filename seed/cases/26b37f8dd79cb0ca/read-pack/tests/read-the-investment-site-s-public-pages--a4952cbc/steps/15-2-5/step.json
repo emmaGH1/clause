@@ -1,0 +1,10 @@
+{
+  "kind": "analyze",
+  "status": "passed",
+  "summary": "analyze: ANALYZE(url, 'The URL of the page showing the visible passage (the current page,",
+  "duration_ms": 7040.1,
+  "url": "https://www.mod-mountltd.com/en/faq/",
+  "action_id": "a846f3b5-c67c-4365-90ab-6c9687791818",
+  "ordinal": 15,
+  "id": "2-5"
+}

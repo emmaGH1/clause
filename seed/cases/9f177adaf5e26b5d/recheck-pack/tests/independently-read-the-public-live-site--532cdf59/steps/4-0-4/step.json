@@ -1,0 +1,15 @@
+{
+  "kind": "analyze",
+  "status": "passed",
+  "summary": "analyze: ANALYZE(url, 'the actual page URL is stored as {{r1_url}} even when the passage ",
+  "duration_ms": 12096.9,
+  "url": "https://www.mod-mountltd.com/en/faq/",
+  "action_id": "f17df025-3477-459a-8d75-37142fb89cba",
+  "analyze_action_ids": [
+    "889e404b-d797-4b29-9e1a-06645aeca096",
+    "d1fab2d5-79f3-4ba9-8df8-e7fe11d173b1",
+    "f17df025-3477-459a-8d75-37142fb89cba"
+  ],
+  "ordinal": 4,
+  "id": "0-4"
+}

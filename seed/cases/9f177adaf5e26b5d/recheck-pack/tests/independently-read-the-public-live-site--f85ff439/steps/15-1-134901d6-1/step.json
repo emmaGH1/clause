@@ -1,0 +1,10 @@
+{
+  "kind": "analyze",
+  "status": "passed",
+  "summary": "analyze: the literal \"NOT FOUND\" is stored as {{r2}}",
+  "duration_ms": 5891.4,
+  "url": "https://www.mod-mountltd.com/en/faq/",
+  "action_id": "afbca5db-1ae1-40b3-b422-7f7a4371a7e0",
+  "ordinal": 15,
+  "id": "1-134901d6-1"
+}

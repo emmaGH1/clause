@@ -1,11 +1,52 @@
-// Claude extracts the sender’s exact claims and assesses what Kane’s captures say about each one.
-// Runs Claude headless (`claude -p`) with no tools and a strict JSON schema.
+// A language model extracts the sender’s exact claims and assesses what Kane’s captures say about each one.
+// It never writes a quote: every quote, page and screenshot comes from Kane.
+// Model: Meta Muse (Responses API, JSON schema) when META_IDENTITY_TOKEN or META_API_KEY is set,
+// otherwise Claude headless (`claude -p`) with no tools and a strict JSON schema.
 import { spawn } from "node:child_process";
 import { exactExcerpt, normalize, NOT_FOUND, publicUrl } from "./text.mjs";
 
 const MODEL = process.env.AGENT_MODEL ?? "sonnet";
 
+const META_MODEL = process.env.META_MODEL ?? "muse-spark-1.3";
+let metaKey = process.env.META_API_KEY ? { key: process.env.META_API_KEY, until: Infinity } : null;
+
+async function metaApiKey() {
+  if (metaKey && metaKey.until > Date.now()) return metaKey.key;
+  // Exchange the Meta identity token for a Model API key (valid about a day); refresh hourly.
+  const r = await fetch("https://api.meta.ai/muse-code/key", {
+    method: "POST", body: "{}",
+    headers: { Accept: "application/json", Authorization: `Bearer ${process.env.META_IDENTITY_TOKEN}`, "Content-Type": "application/json", "x-api-version": "1.0.0" },
+  });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok || !j.api_key) throw new Error(`Meta key mint failed (${r.status})`);
+  metaKey = { key: j.api_key, until: Date.now() + 60 * 60 * 1000 };
+  return metaKey.key;
+}
+
+async function meta(prompt, schema, system) {
+  let last;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await fetch("https://api.meta.ai/v1/responses", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${await metaApiKey()}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ model: META_MODEL, instructions: system, input: prompt, text: { format: { type: "json_schema", name: "result", schema, strict: false } } }),
+        signal: AbortSignal.timeout(90_000),
+      });
+      const o = await res.json().catch(() => ({}));
+      if (res.status === 401 || res.status === 403) metaKey = process.env.META_API_KEY ? metaKey : null;
+      if (!res.ok) throw new Error(`Meta ${res.status} ${JSON.stringify(o.error ?? o).slice(0, 200)}`);
+      const text = o.output_text ?? o.output?.flatMap((x) => x.content ?? []).find((c) => typeof c.text === "string")?.text;
+      return JSON.parse(text);
+    } catch (e) { last = e; }
+  }
+  throw new Error(`agent failed: ${last.message}`);
+}
+
+const useMeta = () => Boolean(process.env.META_IDENTITY_TOKEN || process.env.META_API_KEY);
+
 export function claude(prompt, schema, system) {
+  if (useMeta()) return meta(prompt, schema, system);
   return new Promise((resolve, reject) => {
     const args = ["-p", "--model", MODEL, "--output-format", "json", "--tools", "", "--no-session-persistence",
       "--setting-sources", "", "--json-schema", JSON.stringify(schema), "--system-prompt", system];

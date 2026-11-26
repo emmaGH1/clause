@@ -1,0 +1,10 @@
+{
+  "kind": "navigate",
+  "status": "passed",
+  "summary": "navigate: Navigate to https://www.mod-mountltd.com/en/faq/",
+  "duration_ms": 0.7,
+  "url": "https://www.mod-mountltd.com/en/faq/",
+  "action_id": "36fd5732-4ee9-4707-bdad-835a62909cc9",
+  "ordinal": 1,
+  "id": "0-1"
+}
