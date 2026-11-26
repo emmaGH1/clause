@@ -70,7 +70,8 @@ function summarize(end, outDir, name, evidencePack) {
     ([key, entry]) => entry.analyzer_type !== "url" && !/(^|_)url$/.test(key),
   );
   const sourceUrls = Object.fromEntries(captures.map(([key]) => [
-    key, shots.pageByVar[key] || vars[`${key}_url`] || (captures.length === 1 ? vars.source_url : null),
+    // Kane's own stored page URL wins: a step's URL metadata can still show the page it started on.
+    key, vars[`${key}_url`] || shots.pageByVar[key] || (captures.length === 1 ? vars.source_url : null),
   ]));
   return {
     status: end.status, runId: runIdentity(end), sessionDir: end.session_dir, testUrl: end.test_url,
