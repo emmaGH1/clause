@@ -38,7 +38,7 @@ const escape = (value) => String(value ?? "").replace(/[&<>"']/g, (ch) => ({
   "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
 })[ch]);
 
-const MARK = `<svg class="mark" viewBox="0 0 8 8" aria-hidden="true" shape-rendering="crispEdges"><path fill="currentColor" d="M2 0h4v1H2zM1 1h1v1H1zM6 1h1v1H6zM0 2h1v4H0zM1 6h1v1H1zM2 7h4v1H2zM6 6h1v1H6z"/><path fill="#2433FF" d="M3 3h2v2H3z"/></svg>`;
+const MARK = `<svg class="mark" viewBox="0 0 16 16" aria-hidden="true" shape-rendering="crispEdges"><g fill="currentColor"><rect x="0" y="0" width="8" height="2"/><rect x="0" y="0" width="2" height="12"/><rect x="8" y="2" width="2" height="2"/><rect x="4" y="4" width="7" height="2"/><rect x="4" y="4" width="2" height="12"/><rect x="11" y="5" width="2" height="2"/><rect x="13" y="7" width="2" height="2"/><rect x="14" y="8" width="2" height="8"/><rect x="4" y="14" width="12" height="2"/></g><rect x="7" y="9" width="5" height="2" fill="#2433FF"/></svg>`;
 
 function layout(body, { mode = "report", refresh = false } = {}) {
   return `<!doctype html>

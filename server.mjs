@@ -42,6 +42,21 @@ function gitCommit() {
   }
 }
 
+// Each check spends real Kane credits: cap concurrent runs and runs per hour on the public URL.
+const BUSY = "Kane is busy with other checks right now. Try again in a few minutes, or read the sample report.";
+const MAX_RUNNING = Number(process.env.MAX_KANE_RUNNING ?? 2), MAX_PER_HOUR = Number(process.env.MAX_KANE_PER_HOUR ?? 20);
+let kaneRunning = 0;
+const kaneStarts = [];
+function takeKaneSlot() {
+  const hourAgo = Date.now() - 3600_000;
+  while (kaneStarts.length && kaneStarts[0] < hourAgo) kaneStarts.shift();
+  if (kaneRunning >= MAX_RUNNING || kaneStarts.length >= MAX_PER_HOUR) return false;
+  kaneRunning++;
+  kaneStarts.push(Date.now());
+  return true;
+}
+function releaseKaneSlot() { kaneRunning = Math.max(0, kaneRunning - 1); }
+
 function send(res, status, body, type = "text/html; charset=utf-8") {
   res.writeHead(status, { "Content-Type": type });
   res.end(body);
@@ -112,6 +127,7 @@ async function route(req, res) {
     const message = (await form(req))?.get("message");
     if (!message?.trim() || message.length > 8000) return send(res, 400, home(errors[400]));
     if (replayMode && !readReplay) return fail(res, 409);
+    if (!takeKaneSlot()) return send(res, 429, home(BUSY));
     void createCase(message, {
       replay: readReplay,
       onUpdate(c) {
@@ -120,7 +136,7 @@ async function route(req, res) {
     }).catch((error) => {
       console.error(error.message);
       if (!res.headersSent) fail(res, 500);
-    });
+    }).finally(releaseKaneSlot);
     return;
   }
 
@@ -170,7 +186,8 @@ async function route(req, res) {
       const wrongPage = Boolean(c.wrongPage);
       if (!allowRecheck(wrongPage) || !canRecheck(c)) return fail(res, 409);
       const raw = replayFor(wrongPage);
-      void recheckCase(c, { replay: raw ? { raw } : null });
+      if (!takeKaneSlot()) return send(res, 429, home(BUSY));
+      void Promise.resolve(recheckCase(c, { replay: raw ? { raw } : null })).finally(releaseKaneSlot);
       return redirect(res, `/case/${id}`);
     }
     if (action === "wrong-page") {
@@ -178,7 +195,8 @@ async function route(req, res) {
       const claim = Number((await form(req))?.get("claim"));
       const variant = wrongPageCase(c, claim);
       if (!variant) return fail(res, 409);
-      void recheckCase(variant, { replay: wrongPageReplay ? { raw: wrongPageReplay } : null });
+      if (!takeKaneSlot()) return send(res, 429, home(BUSY));
+      void Promise.resolve(recheckCase(variant, { replay: wrongPageReplay ? { raw: wrongPageReplay } : null })).finally(releaseKaneSlot);
       return redirect(res, `/case/${variant.id}`);
     }
   }

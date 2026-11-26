@@ -13,7 +13,7 @@ export function recheckObjective(claims, pitchClaims) {
       const key = keyFor(claim);
       const opening = claim.quote.split(/\s+/).slice(0, 8).join(" ");
       return `Item ${claim.claim}: open ${claim.sourceUrl} directly. On that page, find the passage that starts with ${JSON.stringify(opening)} (it answers: ${JSON.stringify(pitchClaims[claim.claim - 1].question)}). Expand the FAQ question that contains it if needed.
-Store that passage verbatim as '${key}', copying the complete sentences exactly as shown. Do not paraphrase or use another page. If no passage on this page starts with those words, store exactly NOT FOUND as '${key}'. Store the actual page URL as '${key}_url' even when the passage is absent.`;
+Store that passage verbatim as '${key}', copying the complete sentences exactly as shown. The value of '${key}' must be the passage text itself, never true/false, a yes/no flag or a description, and do not store it under any other name. Do not paraphrase or use another page. If no passage on this page starts with those words, store exactly NOT FOUND as '${key}'. Store the actual page URL as '${key}_url' even when the passage is absent.`;
     }),
   ].join("\n");
 }
