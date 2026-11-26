@@ -5,8 +5,8 @@
 **One line:** Before you send money, send Kane. Paste an investment pitch, and Kane CLI brings back what the company's own website really says, with screenshots, re-checked by a second Kane run before you can share it.
 
 **Links**
-- Live app: https://3000-agq3ndu665es5t4nn6gjyv7wca.instabox.tech
-- Sample report: https://3000-agq3ndu665es5t4nn6gjyv7wca.instabox.tech/case/9f177adaf5e26b5d
+- Live app: https://clause-production-795ae007.up.railway.app
+- Sample report: https://clause-production-795ae007.up.railway.app/case/9f177adaf5e26b5d
 - Repo: https://github.com/emmaGH1/clause
 - Judges file: https://github.com/emmaGH1/clause/blob/main/JUDGES.md
 - Video: (YouTube link, to add)

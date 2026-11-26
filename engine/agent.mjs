@@ -23,14 +23,29 @@ async function metaApiKey() {
   return metaKey.key;
 }
 
+// Model access can differ by key (and by where the key is minted): fall back through the models this key lists.
+let metaModels = null;
+async function metaModelList(key) {
+  if (metaModels) return metaModels;
+  const res = await fetch("https://api.meta.ai/v1/models", { headers: { Authorization: `Bearer ${key}` } }).catch(() => null);
+  const ids = (await res?.json().catch(() => null))?.data?.map(({ id }) => id) ?? [];
+  console.error("Meta models for this key:", ids.join(", ") || `(none, status ${res?.status})`);
+  const preferred = [META_MODEL, "muse-spark-1.3", "muse-spark-1.2", "muse-spark-1.3-contributor", "muse-spark-1.2-contributor", "muse-ember-1.0"];
+  metaModels = [...new Set([...preferred.filter((m) => ids.includes(m)), ...ids.filter((m) => /^muse-(spark|ember|wonder)/.test(m))])];
+  if (!metaModels.length) metaModels = [META_MODEL];
+  return metaModels;
+}
+
 async function meta(prompt, schema, system) {
   let last;
-  for (let attempt = 0; attempt < 2; attempt++) {
+  const models = await metaModelList(await metaApiKey());
+  for (let attempt = 0; attempt < models.length + 1; attempt++) {
+    const model = models[Math.min(attempt, models.length - 1)];
     try {
       const res = await fetch("https://api.meta.ai/v1/responses", {
         method: "POST",
         headers: { Authorization: `Bearer ${await metaApiKey()}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ model: META_MODEL, instructions: system, input: prompt, text: { format: { type: "json_schema", name: "result", schema, strict: false } } }),
+        body: JSON.stringify({ model, instructions: system, input: prompt, text: { format: { type: "json_schema", name: "result", schema, strict: false } } }),
         signal: AbortSignal.timeout(90_000),
       });
       const o = await res.json().catch(() => ({}));

@@ -2,15 +2,15 @@
 
 Every claim Clause makes, where it lives in the code, and how to check it. Kane CLI's part and ours are kept apart.
 
-Live app: https://3000-agq3ndu665es5t4nn6gjyv7wca.instabox.tech
-Sample report (passed re-check): https://3000-agq3ndu665es5t4nn6gjyv7wca.instabox.tech/case/9f177adaf5e26b5d
-Latest live report (run during the final day): https://3000-agq3ndu665es5t4nn6gjyv7wca.instabox.tech/case/72c82b0f4da6fee9
+Live app: https://clause-production-795ae007.up.railway.app
+Sample report (passed re-check): https://clause-production-795ae007.up.railway.app/case/9f177adaf5e26b5d
+Latest live report (run during the final day): https://clause-production-795ae007.up.railway.app/case/72c82b0f4da6fee9
 
 ## One command for the journey
 
 ```bash
 npm install && npx playwright install chromium
-LIVE_URL=https://3000-agq3ndu665es5t4nn6gjyv7wca.instabox.tech node scripts/status.mjs
+LIVE_URL=https://clause-production-795ae007.up.railway.app node scripts/status.mjs
 ```
 
 It opens the live app at phone width (390px), logged out, and checks each journey step against the raw Kane output the app serves. Last result on the final day (26 Nov 2026, 14:02 WAT): J1, J2, J3, J4 and J5 passed. J5! (fail-closed) kept Share locked, but Kane stored a yes/no flag instead of a sentence for one claim, so the strict check reported it red. J5! passed earlier on Kane run `f58874ef-fbfe-41d6-baf1-9b141c9ab485` (`evidence/status/`).
@@ -41,7 +41,7 @@ It opens the live app at phone width (390px), logged out, and checks each journe
 
 ## What's live and what isn't
 
-- The app runs on our sandbox at the URL above. It answers while the sandbox is running.
+- The app runs on Railway from this repo's `Dockerfile` (Chromium + Kane CLI 0.10.9), with reports kept on a Railway volume.
 - Each check spends Kane credits, so the public app allows two Kane runs at once and 20 per hour.
-- Claim splitting and verdict wording use Claude through the `claude` CLI. No quote, page or screenshot comes from Claude.
+- Claim splitting and the verdict per claim use Meta Muse on Railway (Claude locally). No quote, page or screenshot comes from the model.
 - ModMount is the supported demo case. Its regulator notice is stored in `engine/sources.json`.

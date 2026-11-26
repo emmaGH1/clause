@@ -7,7 +7,7 @@ const b=await chromium.launch({headless:false});
 const [vw,vh]=(process.env.VIEWPORT||'430x900').split('x').map(Number);
 const ctx=await b.newContext({viewport:{width:vw,height:vh},recordVideo:{dir:out+'video',size:{width:vw,height:vh}}});
 const p=await ctx.newPage();
-await p.goto('http://localhost:3000/');await p.screenshot({path:out+'1-home.png'});
+await p.goto((process.env.BASE||'http://localhost:3000')+'/');await p.screenshot({path:out+'1-home.png'});
 await p.fill('#message',pitch);await p.waitForTimeout(800);
 await Promise.all([p.waitForNavigation(),p.click('#paste button[type=submit]')]);
 log('case '+p.url());
