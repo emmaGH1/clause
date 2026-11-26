@@ -4,7 +4,7 @@
 
 **Before you send money, send Kane.** Paste an investment pitch someone forwarded you. Kane CLI opens the company's own website, finds the sentences that contradict the pitch, and brings them back with screenshots. A second Kane run re-checks every quote before you can share the report.
 
-**[Try it](https://clause-production-795ae007.up.railway.app)** · **[Sample report](https://clause-production-795ae007.up.railway.app/case/9f177adaf5e26b5d)** · **[Judges start here](#judges-start-here)**
+**[▶ Demo film](https://youtu.be/qmtAHvvECxk)** · **[Try it](https://clause-production-795ae007.up.railway.app)** · **[Sample report](https://clause-production-795ae007.up.railway.app/case/9f177adaf5e26b5d)** · **[Judges start here](#judges-start-here)**
 
 <p align="center"><img src="docs/readme/report.png" alt="Clause report: the pitch said free, the site's FAQ says the company reserves the right to charge a withdrawal fee, with Kane's screenshot and both run IDs" width="100%"></p>
 
