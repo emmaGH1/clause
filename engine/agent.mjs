@@ -173,7 +173,10 @@ export async function rewrite(d, kaneVars) {
     `Mark unverified if Kane stored NOT FOUND or no passage addresses the claim. This means "${NOT_FOUND}".`,
   ].join(" ");
   const claims = d.claims.map((c, i) => ({ claim: i + 1, ...c }));
-  return claude(JSON.stringify({ claims, kane_captured: kaneVars }), REWRITE_SCHEMA, system);
+  // Only Kane's stored passages (c1, c2, ...). Kane sometimes adds its own helper flags such as
+  // c2_answer_absent = "true" next to a captured passage; those must not decide the verdict.
+  const passages = Object.fromEntries(Object.entries(kaneVars).filter(([key, value]) => /^c\d+$/.test(key) && typeof value === "string"));
+  return claude(JSON.stringify({ claims, kane_captured: passages }), REWRITE_SCHEMA, system);
 }
 
 export function bind(sentences, kane, d) {
