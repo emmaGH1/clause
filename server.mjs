@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { canShare, canRecheck, caseDir, createCase, latestCase, readCase, recheckCase, wrongPageCase } from "./engine/case.mjs";
 import { home, report, reading, leadEvidence, errorPage, errors } from "./page.mjs";
-import { quoteBounds } from "./engine/evidence-bounds.mjs";
+import { evidenceShot, quoteBounds } from "./engine/evidence-bounds.mjs";
 
 const root = fileURLToPath(new URL(".", import.meta.url));
 const sampleId = "9f177adaf5e26b5d";
@@ -120,7 +120,7 @@ async function route(req, res) {
   }
   if (get && pathname === "/version.json") return json(res, { commit });
   if (get && pathname === "/api/cases/latest") {
-    const c = latestCase({ wrongPage: searchParams.get("variant") === "wrong-page" });
+    const c = latestCase({ wrongPage: searchParams.get("variant") === "wrong-page", complete: true });
     return c ? json(res, summary(c)) : json(res, { error: errors[404] }, 404);
   }
   if (post && pathname === "/cases") {
@@ -151,7 +151,9 @@ async function route(req, res) {
     const bounds = new Map();
     if (c.format === 1 && c.stage === "ready") {
       for (const sentence of c.sentences.filter(({ bound }) => bound)) {
-        bounds.set(sentence.claim, await quoteBounds(caseDir(id), sentence));
+        const evidence = await evidenceShot(caseDir(id), sentence);
+        sentence.shot = evidence.shot;
+        bounds.set(sentence.claim, evidence.bounds);
       }
     }
     return send(res, 200, report(c, { ...options, bounds }));
@@ -159,7 +161,9 @@ async function route(req, res) {
   if (get && section === "case" && !action) {
     if (c.format === 1 && c.stage !== "failed" && (c.stage !== "ready" || searchParams.get("view") === "reading")) {
       const lead = leadEvidence(c);
-      return send(res, 200, reading(c, lead, await quoteBounds(caseDir(id), lead)));
+      const evidence = lead ? await evidenceShot(caseDir(id), lead) : { bounds: null };
+      if (lead) lead.shot = evidence.shot;
+      return send(res, 200, reading(c, lead, evidence.bounds));
     }
     return renderReport({ offerRecheck: allowRecheck(Boolean(c.wrongPage)), offerWrongPage: allowRecheck(true) });
   }
@@ -177,7 +181,8 @@ async function route(req, res) {
     const raw = action?.match(/^kane\/(read|recheck)\.ndjson$/);
     if (raw) return serveFile(res, join(caseDir(id), `${raw[1]}.ndjson`), "application/x-ndjson; charset=utf-8");
     const image = action?.match(/^shots\/(\d+)\.jpg$/);
-    const shot = image && c.sentences?.find(({ claim }) => claim === Number(image[1]))?.shot;
+    const sentence = image && c.sentences?.find(({ claim }) => claim === Number(image[1]));
+    const shot = sentence?.bound ? (await evidenceShot(caseDir(id), sentence)).shot : sentence?.shot;
     return shot ? serveFile(res, join(caseDir(id), shot), "image/jpeg") : fail(res, 404);
   }
   if (post && section === "case") {

@@ -67,12 +67,12 @@ pitch ──► a language model splits it into claims, one per promise
 
 - **ModMount is the supported demo case.** Its regulator notice (SEC Nigeria, 19 January 2026) is quoted word for word in the report. Other sites work, but they have no regulator notice attached.
 - Kane is an agent, and runs vary. In our live testing it sometimes joined two FAQ answers into one quote, recorded the homepage instead of the FAQ, or stored a yes/no flag instead of the sentence. Each time, Clause refused to unlock Share rather than show a doubtful quote. An incomplete re-check can be run again from the report.
-- Claim splitting and the verdict per claim use a language model with a strict JSON schema: Meta Muse on the deployed app, Claude (`claude -p`) when run locally. It never writes a quote. Every quote, page and screenshot comes from Kane.
+- Claim splitting and the verdict per claim use a language model with a strict JSON schema: Claude (`claude -p`, Sonnet) on the deployed app and locally. It never writes a quote. Every quote, page and screenshot comes from Kane.
 
 <details>
 <summary>Run it yourself</summary>
 
-Requires Node 22, `kane-cli` (logged in) and either `META_IDENTITY_TOKEN`/`META_API_KEY` (Meta Muse) or the `claude` CLI on `PATH`. The `Dockerfile` is what runs on Railway.
+Requires Node 22, `kane-cli` (logged in) and the `claude` CLI on `PATH` (logged in, or `CLAUDE_CODE_OAUTH_TOKEN`). Meta Muse also works via `META_API_KEY`. The `Dockerfile` is what runs on Railway.
 
 ```bash
 npm install

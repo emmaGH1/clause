@@ -108,10 +108,10 @@ export function home(error = "", sample = null, bounds = new Map()) {
   <div class="hero-ctas"><a class="btn primary" href="#paste">Check a pitch</a>${sample ? `<a class="btn ghost" href="/case/${sample.id}">View sample report</a>` : ""}</div>
 </section>
 ${demo ? `<section class="window demo" aria-label="Clause checking a sample pitch" data-demo-window='${escape(JSON.stringify(demo))}'>
-  <div class="chrome"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="addr mono">clause.app/check</span></div>
+  <div class="chrome"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="addr mono">Replay · Kane run ${escape(demo.run)} · 25 Nov 2026</span></div>
   <div class="panes">
     <div class="pane left">
-      ${bubble(demo.message)}
+      ${bubble(demo.message, { label: "Sample pitch · replayed from a real run" })}
       <ul class="claims" data-claims>${demo.claims.map(({ claim, text }) => `<li data-claim="${claim}"><span>${escape(text)}</span><b class="mono">Waiting</b></li>`).join("")}</ul>
       <div class="link-quote" data-quote hidden><blockquote>“${escape(demo.quote)}”</blockquote><p class="mono">${escape(demo.page)} · run ${escape(demo.run)}</p></div>
     </div>
@@ -122,6 +122,7 @@ ${demo ? `<section class="window demo" aria-label="Clause checking a sample pitc
     </div>
   </div>
 </section>` : ""}
+<!--paste-->
 <section class="chapters" id="how">
   <article class="chapter">${pixel("pitch")}<div><p class="mono">01 · The problem</p><h2>The pitch says <s>free</s>. The fine print doesn't.</h2><p>Forwarded pitches promise instant withdrawals and money that doubles. The conditions sit on the company's own FAQ, one click deeper than anyone looks.</p></div></article>
   <article class="chapter">${pixel("lens")}<div><p class="mono">02 · What Clause does</p><h2>Paste the pitch. Get <em>their own words</em> back.</h2><p>Clause splits the message into claims, one per promise, and sets each one beside the sentence the site actually publishes. Anything Kane can't find is labelled, never guessed.</p></div></article>
@@ -129,8 +130,7 @@ ${demo ? `<section class="window demo" aria-label="Clause checking a sample pitc
   <article class="chapter">${pixel("camera")}<div><p class="mono">04 · Capture</p><h2>Every quote comes with <em>Kane's screenshot.</em></h2><p>The report prints only text Kane stored itself, beside the screenshot, page and run ID it came from. Nothing is paraphrased.</p></div></article>
   <article class="chapter">${pixel("lock")}<div><p class="mono">05 · Re-check</p><h2>A second Kane run, <em>or no Share.</em></h2><p>A fresh run goes back to each cited page and must find the same sentence again. Cite the wrong page and Share stays locked.</p></div></article>
 </section>` : "";
-  return layout(`${hero}
-<section class="paste-wrap" id="paste">
+  const paste = `<section class="paste-wrap" id="paste">
   ${pixel("eye", "paste-icon")}
   <form class="paste-form" method="post" action="/cases" data-demo="app-ready">
     <h${hero ? 2 : 1}>Check an investment pitch</h${hero ? 2 : 1}>
@@ -139,7 +139,8 @@ ${demo ? `<section class="window demo" aria-label="Clause checking a sample pitc
     <textarea id="message" name="message" rows="5" required maxlength="8000" placeholder="Paste the message you were sent, with the company's link"></textarea>
     <div class="paste-row"><span class="mono">Kane reads the site live · about 3 minutes</span><button class="btn primary" type="submit" aria-label="${copy.check}">Check <span aria-hidden="true">→</span></button></div>
   </form>
-</section>`, { mode: "landing" });
+</section>`;
+  return layout(error ? paste : hero.replace("<!--paste-->", paste), { mode: "landing" });
 }
 
 export function errorPage(status) {
@@ -286,7 +287,8 @@ function claimRow(c, sentence, { shared, offerWrongPage, bounds }) {
         ${result.visitedUrl && result.visitedUrl !== sourceUrl && result.visitedUrl !== originalSource ? `<p>Kane visited ${escape(pageLabel(result.visitedUrl))} during the re-check.</p>` : ""}
       </div>` : ""}
     </div>
-    <div class="final" data-demo="final-claim" data-verdict="${escape(verdict)}"${bound ? ` data-evidence="${escape(evidence)}"` : ""}>${proof}</div>
+    ${bound ? `<div class="final" data-demo="final-claim" data-verdict="${escape(verdict)}" data-evidence="${escape(evidence)}">${proof}</div>`
+      : `<div class="final"><div class="col quote-col"><p class="col-label mono">The site says</p><p class="no-evidence" data-demo="final-claim" data-verdict="${escape(verdict)}">${NOT_FOUND}</p></div><div class="col shot-col empty" aria-hidden="true">${pixel("lens", "dim")}</div></div>`}
   </li>`;
 }
 

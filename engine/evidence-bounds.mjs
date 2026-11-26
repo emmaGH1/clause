@@ -1,6 +1,6 @@
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
-import { readFile, rename, writeFile } from "node:fs/promises";
+import { readdir, readFile, rename, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { promisify } from "node:util";
 
@@ -65,4 +65,25 @@ export function quoteBounds(dir, { shot, quote } = {}) {
     active.set(cache, locate(dir, shot, quote, cache).finally(() => active.delete(cache)));
   }
   return active.get(cache);
+}
+
+// Kane sometimes stores a value on the step before the answer is expanded on screen.
+// When the bound screenshot doesn't show the quote, use the nearest screenshot from the
+// same Kane run (next steps first) where OCR finds the exact quote, so the image proves the text.
+export async function evidenceShot(dir, sentence = {}) {
+  const { shot, quote } = sentence;
+  const own = await quoteBounds(dir, sentence);
+  if (own || !shot || !quote) return { shot, bounds: own };
+  const parts = shot.split("/");
+  const stepsDir = parts.slice(0, -2).join("/");
+  const steps = (await readdir(join(dir, stepsDir)).catch(() => [])).sort((a, b) => parseInt(a) - parseInt(b));
+  const at = steps.indexOf(parts.at(-2));
+  if (at < 0) return { shot, bounds: null };
+  const order = [at + 1, at + 2, at + 3, at - 1, at - 2].filter((i) => i >= 0 && i < steps.length);
+  for (const i of order) {
+    const candidate = `${stepsDir}/${steps[i]}/screenshot.jpg`;
+    const bounds = await quoteBounds(dir, { shot: candidate, quote });
+    if (bounds) return { shot: candidate, bounds };
+  }
+  return { shot, bounds: null };
 }

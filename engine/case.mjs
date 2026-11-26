@@ -30,13 +30,16 @@ function newCase(fields) {
   return c;
 }
 
-export function latestCase({ wrongPage = false, from, claim } = {}) {
+// complete: only cases whose read finished and whose Kane re-check reached a verdict (passed or failed),
+// so failed or abandoned test runs don't replace the latest finished proof.
+export function latestCase({ wrongPage = false, from, claim, complete = false } = {}) {
   if (!existsSync(CASES)) return null;
   const cases = readdirSync(CASES).filter((id) => /^[a-f0-9]{10,16}$/.test(id)).flatMap((id) => {
     if (!existsSync(join(caseDir(id), "case.json"))) return [];
     const c = readCase(id);
     if (c.format !== 1 || Boolean(c.wrongPage) !== wrongPage) return [];
     if (from && (c.wrongPage.from !== from || c.wrongPage.claim !== claim)) return [];
+    if (complete && !(c.stage === "ready" && ["passed", "failed"].includes(c.recheck?.status))) return [];
     return [c];
   });
   return cases.sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0] ?? null;

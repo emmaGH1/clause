@@ -43,5 +43,5 @@ It opens the live app at phone width (390px), logged out, and checks each journe
 
 - The app runs on Railway from this repo's `Dockerfile` (Chromium + Kane CLI 0.10.9), with reports kept on a Railway volume.
 - Each check spends Kane credits, so the public app allows two Kane runs at once and 20 per hour.
-- Claim splitting and the verdict per claim use Meta Muse on Railway (Claude locally). No quote, page or screenshot comes from the model.
+- Claim splitting and the verdict per claim use Claude (`claude -p`, strict JSON schema). No quote, page or screenshot comes from the model.
 - ModMount is the supported demo case. Its regulator notice is stored in `engine/sources.json`.
