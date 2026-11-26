@@ -1,0 +1,17 @@
+[2s] case http://localhost:3000/case/72c82b0f4da6fee9?view=reading
+[33s] reading… Clause | Check a pitch | 
+[63s] reading… Clause | Check a pitch | 
+[94s] reading… Clause | Check a pitch | 
+[124s] reading… Clause | Check a pitch | 
+[154s] reading… Clause | Check a pitch | 
+[184s] reading… Clause | Check a pitch | 
+[215s] reading… Clause | Check a pitch | 
+[245s] reading… Clause | Check a pitch | 
+[275s] reading… Clause | Check a pitch | 
+[305s] reading… Clause | Check a pitch | 
+[305s] read finished
+[306s] report http://localhost:3000/case/72c82b0f4da6fee9
+[307s] re-check started
+[433s] re-check verdict match
+[435s] share enabled: true
+[435s] done http://localhost:3000/case/72c82b0f4da6fee9

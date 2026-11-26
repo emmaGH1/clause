@@ -95,7 +95,7 @@ export async function createCase(message, { replay = null, onUpdate } = {}) {
 
 export const canShare = (c) => c.format === 1 && !c.replay && !c.recheck?.replay && c.recheck?.status === "passed";
 
-export const canRecheck = (c) => c.stage === "ready" && !c.recheck && c.sentences.some(({ bound }) => bound);
+export const canRecheck = (c) => c.stage === "ready" && (!c.recheck || c.recheck.status === "incomplete") && c.sentences.some(({ bound }) => bound);
 
 function homepageFor(c, sentence) {
   const home = new URL(sentence.sourceUrl);

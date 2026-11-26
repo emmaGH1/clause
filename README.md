@@ -66,7 +66,7 @@ pitch ──► Claude splits it into claims, one per promise
 ## Scope and limits
 
 - **ModMount is the supported demo case.** Its regulator notice (SEC Nigeria, 19 January 2026) is quoted word for word in the report. Other sites work, but they have no regulator notice attached.
-- Kane is an agent: on some runs it joins two FAQ answers or records the wrong page. Clause then refuses to unlock Share rather than show a doubtful quote. Running the check again usually succeeds.
+- Kane is an agent, and runs vary. In our live testing it sometimes joined two FAQ answers into one quote, recorded the homepage instead of the FAQ, or stored a yes/no flag instead of the sentence. Each time, Clause refused to unlock Share rather than show a doubtful quote. An incomplete re-check can be run again from the report.
 - Claim splitting and verdict wording use Claude (`claude -p`, strict JSON schema). Every quote and screenshot comes from Kane.
 
 <details>
