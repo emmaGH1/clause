@@ -1,0 +1,42 @@
+[
+ [
+  "s1",
+  "Someone forwards you an investment pitch. Join ModMount today. Your money doubles in two weeks. Withdrawals are instant and free. Before you send money, send Kane."
+ ],
+ [
+  "s2",
+  "Pitches like this usually contradict the company's own website. The conditions are right there in the FAQ, one click deeper than anyone looks. And ModMount is a real case: Nigeria's securities regulator says it isn't registered or licensed."
+ ],
+ [
+  "s3",
+  "This is Clause. You paste the message, with the company's link. A language model splits it into separate promises, kept in the sender's exact words: instant, free, and doubles in two weeks."
+ ],
+ [
+  "s4",
+  "Then Clause hands Kane CLI one read-only objective, run as an agent. Kane opens the live site, finds the Help Center, opens the FAQ, expands the withdrawal answers, and stores each answer word for word, with the page and a screenshot. Its steps stream into the app while it works. It never signs up, logs in or deposits anything."
+ ],
+ [
+  "s5",
+  "When Kane finishes, the report sets each promise beside the site's own sentence. Instant: the withdrawal process takes about eight to ten business days. Free: the company reserves the right to charge a withdrawal fee. Every quote is the exact value Kane stored, never model output, shown with the screenshot Kane captured. Doubles in two weeks: Kane couldn't find it on the pages it checked, so the report says exactly that."
+ ],
+ [
+  "s6",
+  "Before you can share the report, a second, fresh Kane run goes back to each cited page and looks for the same sentence. A different run, only the cited page, the exact words. Here it found both quotes again, so Share unlocks."
+ ],
+ [
+  "s7",
+  "Point a quote at the wrong page, the homepage, and Kane can't find it there. The claim is flagged and Share stays locked. In our own testing, Kane sometimes stored a yes or no flag instead of the sentence. Clause refused to unlock those too."
+ ],
+ [
+  "s9",
+  "And all of it is checkable. The app serves Kane's raw output for every report, so you can compare each quote with what Kane stored. A status script checks every step of the journey at phone width against the live app."
+ ],
+ [
+  "s10",
+  "This is the loop. Kane's stored words decide what the report is allowed to print. Kane's page addresses decide where each quote is cited. And a second Kane run decides whether Share unlocks. Where Kane found nothing, Clause says so, and never fills the gap with a guess."
+ ],
+ [
+  "s8",
+  "Clause is live, and the code, the raw Kane output and the judge checks are on GitHub. Before you send money, send Kane."
+ ]
+]

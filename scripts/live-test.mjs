@@ -12,10 +12,11 @@ await p.fill('#message',pitch);await p.waitForTimeout(800);
 await Promise.all([p.waitForNavigation(),p.click('#paste button[type=submit]')]);
 log('case '+p.url());
 let n=0;
-while(!(await p.getByRole('link',{name:/Read the report/i}).count())){
+const has=async(l)=>{try{return await l.count()}catch{return 0}};
+while(!(await has(p.getByRole('link',{name:/Read the report/i})))){
   if(Date.now()-t0>20*60e3)throw new Error('read timed out');
-  if(await p.getByText(/Check incomplete/i).count())throw new Error('case failed: Check incomplete');
-  await p.waitForTimeout(5000);if(++n%6===0){await p.screenshot({path:out+`2-reading-${n}.png`});log('reading… '+(await p.locator('body').innerText()).split('\n').slice(0,3).join(' | '))}
+  if(await has(p.getByText(/Check incomplete/i)))throw new Error('case failed: Check incomplete');
+  await p.waitForTimeout(5000);if(++n%6===0){await p.screenshot({path:out+`2-reading-${n}.png`});log('reading…')}
 }
 log('read finished');await p.screenshot({path:out+'3-reading-done.png',fullPage:true});
 await Promise.all([p.waitForNavigation(),p.getByRole('link',{name:/Read the report/i}).click()]);
