@@ -1,7 +1,7 @@
 {
-  "at": "2026-11-26T11:38:34.649Z",
-  "deploy": "deploy b8a4c7fc67c51fe9e34e49edfaf9c4d5eb0c0fd4",
-  "clock": "Clock 85% elapsed · journey green",
+  "at": "2026-11-26T15:16:22.731Z",
+  "deploy": "deploy eed89d87ee56ab958f0d695a5ca03ce917b4e0f7",
+  "clock": "Clock 93% elapsed · journey green",
   "approval": "✓ checks match what you approved (25/11/2026, 21:30 WAT · approvals: 2)",
   "approved": true,
   "fingerprint": "e5af6aa7760721f9",
@@ -21,7 +21,7 @@
       "done": "the case shows Kane's exact quoted wording, its screenshot, the source page and a Kane run ID, and the quote equals the value in that run's raw Kane output",
       "sponsor": true,
       "state": "pass",
-      "saw": "Kane run 602eadc4-56c2-458a-869b-462225667527 shows the exact stored quote, screenshot and source page"
+      "saw": "Kane run a4c448b2-9ef9-4014-82c4-ddcb0b11865d shows the exact stored quote, screenshot and source page"
     },
     {
       "id": "J3",
@@ -45,7 +45,7 @@
       "done": "a second, fresh Kane run (different run ID) opens each cited page on the live site and finds the quoted sentence itself; only when every quote is found again is Share enabled",
       "sponsor": true,
       "state": "pass",
-      "saw": "fresh Kane run d48432e4-b1f3-4562-b9c3-0ad79c963c21 re-found every quote on its cited page and unlocked Share"
+      "saw": "fresh Kane run aa36edde-ffbd-48ef-a77b-2481a90d4ac6 re-found every quote on its cited page and unlocked Share"
     },
     {
       "id": "J5!",
@@ -53,7 +53,7 @@
       "done": "a report whose claim cites the wrong page (the homepage) fails the re-check: Kane can't find the sentence there, the claim is flagged, and Share stays locked",
       "sponsor": false,
       "state": "pass",
-      "saw": "fresh Kane run f58874ef-fbfe-41d6-baf1-9b141c9ab485 missed the homepage quote, flagged the claim, and kept Share locked"
+      "saw": "fresh Kane run 01022c32-8e81-48a7-bcba-a1f0aaaf78d3 missed the homepage quote, flagged the claim, and kept Share locked"
     }
   ],
   "passed": 6,

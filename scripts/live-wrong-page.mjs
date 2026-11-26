@@ -2,7 +2,7 @@
 import { chromium } from 'playwright';
 const id=process.argv[2];const t0=Date.now(),log=m=>console.log(`[${((Date.now()-t0)/1000).toFixed(0)}s] ${m}`);
 const b=await chromium.launch({headless:false});const p=await (await b.newContext({viewport:{width:1280,height:860}})).newPage();
-await p.goto(`http://localhost:3000/case/${id}`);await p.waitForTimeout(1200);
+await p.goto(`${process.env.BASE||'http://localhost:3000'}/case/${id}`);await p.waitForTimeout(1200);
 const btn=p.getByRole('button',{name:/Point this claim at the homepage/i}).first();
 await btn.scrollIntoViewIfNeeded();await Promise.all([p.waitForNavigation(),btn.click()]);log('wrong-page run started '+p.url());
 for(;;){if(Date.now()-t0>20*60e3)throw new Error('timed out');await p.waitForTimeout(6000);

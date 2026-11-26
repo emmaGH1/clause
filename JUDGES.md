@@ -4,7 +4,8 @@ Every claim Clause makes, where it lives in the code, and how to check it. Kane 
 
 Live app: https://clause-production-795ae007.up.railway.app
 Sample report (passed re-check): https://clause-production-795ae007.up.railway.app/case/9f177adaf5e26b5d
-Latest live report (run during the final day): https://clause-production-795ae007.up.railway.app/case/72c82b0f4da6fee9
+Latest live report (run on Railway, final day): https://clause-production-795ae007.up.railway.app/case/9ad67f5b95e4ffbf
+Wrong-page report (Share locked): https://clause-production-795ae007.up.railway.app/case/027d3b20733ae5a4
 
 ## One command for the journey
 
@@ -13,7 +14,7 @@ npm install && npx playwright install chromium
 LIVE_URL=https://clause-production-795ae007.up.railway.app node scripts/status.mjs
 ```
 
-It opens the live app at phone width (390px), logged out, and checks each journey step against the raw Kane output the app serves. Last result on the final day (26 Nov 2026, 14:02 WAT): J1, J2, J3, J4 and J5 passed. J5! (fail-closed) kept Share locked, but Kane stored a yes/no flag instead of a sentence for one claim, so the strict check reported it red. J5! passed earlier on Kane run `f58874ef-fbfe-41d6-baf1-9b141c9ab485` (`evidence/status/`).
+It opens the live app at phone width (390px), logged out, and checks each journey step against the raw Kane output the app serves. Result on Railway, 26 Nov 2026 16:16 WAT: **full journey passed** (J1–J5 and J5!). Read run `a4c448b2`, re-check `aa36edde` unlocked Share; wrong-page re-check `01022c32` missed the homepage quote and kept Share locked.
 
 ## Claims, code, checks
 
@@ -38,6 +39,9 @@ It opens the live app at phone width (390px), logged out, and checks each journe
 | 1 | "…instant and there are no fees at all. Start with $500" | `c5d55e68` · 3 quotes incl. $250 minimum deposit | `c4f9cacb` | Kane stored "true" flags instead of passages → Share locked (fail-closed) |
 | 2 | canonical ModMount pitch | `883ff94d` · joined three FAQ answers into one quote | `05ae9df2` | quote not re-found → Share locked (fail-closed) |
 | 3 | canonical ModMount pitch, tightened objectives | `3a6f4082` | `21592395` | both quotes re-found → **Share unlocked** |
+| 4 | canonical pitch, on Railway | `c4e4de36` | `dd671265` | fee quote cited on the homepage (step metadata) → fixed: cite Kane's stored page URL |
+| 5 | canonical pitch, on Railway | `7de291b3` | `ba55aa43` | Share unlocked; fee judged unverified because of Kane's `c2_answer_absent` flag → fixed: verdicts use stored passages only |
+| 6 | canonical pitch, on Railway | `a4c448b2` | `aa36edde` | instant and free struck, doubles not found, **Share unlocked**; wrong-page run `01022c32` kept Share locked |
 
 ## What's live and what isn't
 

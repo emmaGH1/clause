@@ -1,0 +1,62 @@
+{
+  "at": "2026-11-26T15:16:22.731Z",
+  "deploy": "deploy eed89d87ee56ab958f0d695a5ca03ce917b4e0f7",
+  "clock": "Clock 93% elapsed · journey green",
+  "approval": "✓ checks match what you approved (25/11/2026, 21:30 WAT · approvals: 2)",
+  "approved": true,
+  "fingerprint": "e5af6aa7760721f9",
+  "problems": [],
+  "steps": [
+    {
+      "id": "J1",
+      "step": "open it from the public link",
+      "done": "the paste box opens at phone width, not a landing page",
+      "sponsor": false,
+      "state": "pass",
+      "saw": "paste box and Check button visible at 390px"
+    },
+    {
+      "id": "J2",
+      "step": "Kane reads the live site",
+      "done": "the case shows Kane's exact quoted wording, its screenshot, the source page and a Kane run ID, and the quote equals the value in that run's raw Kane output",
+      "sponsor": true,
+      "state": "pass",
+      "saw": "Kane run a4c448b2-9ef9-4014-82c4-ddcb0b11865d shows the exact stored quote, screenshot and source page"
+    },
+    {
+      "id": "J3",
+      "step": "the pitch's claims, checked one by one",
+      "done": "each claim appears in the sender's exact words, one per claim (\"instant\" and \"free\" are separate); a claim the site's own wording contradicts is struck out beside that sentence; anything Kane didn't capture reads \"Kane couldn't find this on the pages it checked\"",
+      "sponsor": false,
+      "state": "pass",
+      "saw": "3 pitch excerpts, with instant and free separate and 1 uncaptured"
+    },
+    {
+      "id": "J4",
+      "step": "the report",
+      "done": "a shareable report page lists every claim: the pitch's wording, the site's own words with Kane's screenshot, or \"Kane couldn't find this on the pages it checked\"; the regulator notice is quoted word for word with its name and date; ModMount is labelled the supported demo case",
+      "sponsor": false,
+      "state": "pass",
+      "saw": "report shows all 3 claims and the original regulator notice on the supported ModMount case"
+    },
+    {
+      "id": "J5",
+      "step": "Kane re-checks the live site",
+      "done": "a second, fresh Kane run (different run ID) opens each cited page on the live site and finds the quoted sentence itself; only when every quote is found again is Share enabled",
+      "sponsor": true,
+      "state": "pass",
+      "saw": "fresh Kane run aa36edde-ffbd-48ef-a77b-2481a90d4ac6 re-found every quote on its cited page and unlocked Share"
+    },
+    {
+      "id": "J5!",
+      "step": "fail-closed",
+      "done": "a report whose claim cites the wrong page (the homepage) fails the re-check: Kane can't find the sentence there, the claim is flagged, and Share stays locked",
+      "sponsor": false,
+      "state": "pass",
+      "saw": "fresh Kane run 01022c32-8e81-48a7-bcba-a1f0aaaf78d3 missed the homepage quote, flagged the claim, and kept Share locked"
+    }
+  ],
+  "passed": 6,
+  "total": 6,
+  "next": "Next: journey green. polish, proof and demo are now allowed."
+}
