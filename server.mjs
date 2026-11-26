@@ -14,6 +14,12 @@ const assetTypes = new Map([
   ["clause.js", "text/javascript; charset=utf-8"],
   ["glyph-mask.svg", "image/svg+xml"],
   ["receipt.webp", "image/webp"],
+  ["site.css", "text/css; charset=utf-8"],
+  ["site.js", "text/javascript; charset=utf-8"],
+  ["pixels.js", "text/javascript; charset=utf-8"],
+  ["logo.svg", "image/svg+xml"],
+  ["fonts/inter-tight.woff2", "font/woff2"],
+  ["fonts/jetbrains-mono.woff2", "font/woff2"],
   ["fonts/ibm-plex-mono-400.woff2", "font/woff2"],
   ["fonts/ibm-plex-mono-600.woff2", "font/woff2"],
   ["fonts/space-mono-700.woff2", "font/woff2"],
@@ -91,7 +97,11 @@ async function route(req, res) {
   }
   if (get && pathname === "/") {
     const sample = existsSync(join(caseDir(sampleId), "case.json")) ? readCase(sampleId) : null;
-    return send(res, 200, home("", sample));
+    const bounds = new Map();
+    for (const sentence of sample?.sentences?.filter(({ bound }) => bound) ?? []) {
+      bounds.set(sentence.claim, await quoteBounds(caseDir(sampleId), sentence));
+    }
+    return send(res, 200, home("", sample, bounds));
   }
   if (get && pathname === "/version.json") return json(res, { commit });
   if (get && pathname === "/api/cases/latest") {

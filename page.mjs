@@ -38,6 +38,8 @@ const escape = (value) => String(value ?? "").replace(/[&<>"']/g, (ch) => ({
   "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
 })[ch]);
 
+const MARK = `<svg class="mark" viewBox="0 0 8 8" aria-hidden="true" shape-rendering="crispEdges"><path fill="currentColor" d="M2 0h4v1H2zM1 1h1v1H1zM6 1h1v1H6zM0 2h1v4H0zM1 6h1v1H1zM2 7h4v1H2zM6 6h1v1H6z"/><path fill="#2433FF" d="M3 3h2v2H3z"/></svg>`;
+
 function layout(body, { mode = "report", refresh = false } = {}) {
   return `<!doctype html>
 <html lang="en">
@@ -46,53 +48,98 @@ function layout(body, { mode = "report", refresh = false } = {}) {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   ${refresh ? '<noscript><meta http-equiv="refresh" content="3"></noscript>' : ""}
   <title>${copy.name}</title>
-  <meta name="theme-color" content="#180F25">
-  <link rel="stylesheet" href="/assets/clause.css">
+  <meta name="description" content="Paste an investment pitch. Kane CLI opens the company's own website and brings back what it really says, with screenshots.">
+  <meta name="theme-color" content="#F7F7F5">
+  <link rel="icon" href="/assets/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/site.css">
   <script type="module" src="/assets/clause.js"></script>
+  <script type="module" src="/assets/site.js"></script>
 </head>
 <body class="${mode}">
-  <canvas class="paper-field" data-paper-field aria-hidden="true"></canvas>
-  <header class="masthead"><a class="wordmark" href="/" aria-label="Clause home"><span aria-hidden="true">[&gt;]</span> Clause</a></header>
+  <header class="nav">
+    <a class="wordmark" href="/" aria-label="Clause home">${MARK}<span>Clause</span></a>
+    <nav class="nav-links mono"><a href="/#how">How it works</a><a href="/#kane">Kane stack</a><a href="/case/9f177adaf5e26b5d">Sample report</a></nav>
+    <a class="nav-cta" href="/#paste">Check a pitch</a>
+  </header>
   <main>${body}</main>
+  <footer class="foot mono"><span>Clause · Built on Kane CLI by TestMu AI</span><span>Read-only · no sign-ups · no deposits</span></footer>
 </body>
 </html>`;
 }
 
-export function home(error = "", sample = null) {
-  const excerpt = sample?.message.match(/Your money[^.]*\.\s+Withdrawals are instant and free(?=,|\.)/i)?.[0];
-  const samplePitch = excerpt && !error ? `
-  <div class="landing-copy">
-    <div class="sample-receipt">
-      <p class="sample-label">Sample pitch someone sent you</p>
-      <blockquote>${escape(excerpt).replace(/\b(?:doubles in 2 weeks|instant|free)\b/gi, "<u>$&</u>")}.</blockquote>
-    </div>
-    <a class="button primary" aria-label="Check" href="/case/${sample.id}?view=reading"><span aria-hidden="true">[</span> Check this pitch <span aria-hidden="true">→ ]</span></a>
-    <a class="paste-link" href="#paste">Paste your own <span aria-hidden="true">↘</span></a>
-  </div>` : "";
+const CLAIM_WORDS = /\b(?:doubles?(?: in \d+ weeks?)?|instant(?:ly)?|free|no fees?(?: at all)?|guaranteed|licensed|regulated|safe)\b/gi;
+const markPitch = (text) => escape(text).replace(CLAIM_WORDS, '<mark class="false">$&</mark>');
+
+function bubble(message, { label = "Forwarded message · pasted by you" } = {}) {
+  return `<figure class="bubble">
+    <figcaption class="mono"><span aria-hidden="true">↪</span> ${escape(label)} <span class="tag">Unverified pitch</span></figcaption>
+    <blockquote>“${markPitch(message.trim())}”</blockquote>
+  </figure>`;
+}
+
+function claimIcon(text = "") {
+  if (/double|return|profit|%|earn|grow/i.test(text)) return "chart";
+  if (/free|fee|charge|cost/i.test(text)) return "card";
+  if (/instant|withdraw|fast|day|payout/i.test(text)) return "coins";
+  if (/licen|regist|regulat|safe|legit/i.test(text)) return "locked";
+  return "doc";
+}
+const pixel = (icon, cls = "") => `<canvas class="px ${cls}" data-pixel="${icon}" aria-hidden="true"></canvas>`;
+
+export function home(error = "", sample = null, bounds = new Map()) {
+  const lead = sample?.sentences?.filter(({ bound }) => bound).find(({ text }) => /free/i.test(text)) ?? sample?.sentences?.find(({ bound }) => bound);
+  const demo = sample && lead ? {
+    message: "Join ModMount today! Your money doubles in 2 weeks. Withdrawals are instant and free.",
+    steps: (sample.kaneProgress ?? []).filter((step) => /^(navigate|click|scroll)/.test(step)).slice(0, 5),
+    claims: sample.sentences.map(({ claim, text, bound }) => ({ claim, text, bound })),
+    quote: readingQuote(lead.quote),
+    shot: shotUrl(sample, lead),
+    bounds: bounds.get(lead.claim) ?? null,
+    run: sample.kane?.runId?.slice(0, 8),
+    recheck: sample.recheck?.runId?.slice(0, 8),
+    page: defang(lead.sourceUrl).replace(/^www\[\.\]/, ""),
+    report: `/case/${sample.id}`,
+  } : null;
   const hero = !error ? `
-<section class="landing-hero">
-  <div class="landing-title">
-    <h1 class="glyph-title"><span>Did their site</span> <span>say that?</span></h1>
-    <p>Paste an investment pitch. Kane, an AI testing agent, opens the company's own website and brings back their exact words, with screenshots.</p>
-  </div>
-  <div class="landing-demo">
-    <canvas class="receipt-art" data-receipt="/assets/receipt.webp" aria-hidden="true"></canvas>
-    ${samplePitch}
-  </div>
+<section class="hero">
+  <p class="eyebrow mono">Built on Kane CLI by TestMu AI</p>
+  <h1>Before you send money, <em>send Kane.</em></h1>
+  <p class="lede">Paste an investment pitch. Kane opens the company's own website and brings back what it really says, with screenshots.</p>
+  <div class="hero-ctas"><a class="btn primary" href="#paste">Check a pitch</a>${sample ? `<a class="btn ghost" href="/case/${sample.id}">View sample report</a>` : ""}</div>
 </section>
-<ol class="landing-steps" aria-label="How Clause works">
-  <li><span aria-hidden="true">01</span> Paste a pitch</li>
-  <li><span aria-hidden="true">02</span> Kane reads their site, live</li>
-  <li><span aria-hidden="true">03</span> Their own words, re-checked before you share</li>
-</ol>` : "";
+${demo ? `<section class="window demo" aria-label="Clause checking a sample pitch" data-demo-window='${escape(JSON.stringify(demo))}'>
+  <div class="chrome"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="addr mono">clause.app/check</span></div>
+  <div class="panes">
+    <div class="pane left">
+      ${bubble(demo.message)}
+      <ul class="claims" data-claims>${demo.claims.map(({ claim, text }) => `<li data-claim="${claim}"><span>${escape(text)}</span><b class="mono">Waiting</b></li>`).join("")}</ul>
+      <div class="link-quote" data-quote hidden><blockquote>“${escape(demo.quote)}”</blockquote><p class="mono">${escape(demo.page)} · run ${escape(demo.run)}</p></div>
+    </div>
+    <div class="pane right">
+      <div class="stage-head"><span class="badge mono" data-badge>Kane CLI · run ${escape(demo.run)}</span></div>
+      <div class="stage">${pixel("kane", "stage-icon")}</div><figure class="capture" data-capture hidden><span class="cap-label mono">Kane capture · step 08</span><div class="cap-shot"></div></figure>
+      <ol class="steps mono" data-demo-steps></ol>
+    </div>
+  </div>
+</section>` : ""}
+<section class="chapters" id="how">
+  <article class="chapter">${pixel("pitch")}<div><p class="mono">01 · The problem</p><h2>The pitch says <s>free</s>. The fine print doesn't.</h2><p>Forwarded pitches promise instant withdrawals and money that doubles. The conditions sit on the company's own FAQ, one click deeper than anyone looks.</p></div></article>
+  <article class="chapter">${pixel("lens")}<div><p class="mono">02 · What Clause does</p><h2>Paste the pitch. Get <em>their own words</em> back.</h2><p>Clause splits the message into claims, one per promise, and sets each one beside the sentence the site actually publishes. Anything Kane can't find is labelled, never guessed.</p></div></article>
+  <article class="chapter" id="kane">${pixel("term")}<div><p class="mono">03 · Kane stack</p><h2><em>Kane CLI</em> reads the live site.</h2><p>One objective, run as an agent with <code>kane-cli run --agent</code>: open the homepage, find the Help Center, expand the right FAQ, store the exact wording and a screenshot. Read-only: no sign-ups, no deposits.</p></div></article>
+  <article class="chapter">${pixel("camera")}<div><p class="mono">04 · Capture</p><h2>Every quote comes with <em>Kane's screenshot.</em></h2><p>The report prints only text Kane stored itself, beside the screenshot, page and run ID it came from. Nothing is paraphrased.</p></div></article>
+  <article class="chapter">${pixel("lock")}<div><p class="mono">05 · Re-check</p><h2>A second Kane run, <em>or no Share.</em></h2><p>A fresh run goes back to each cited page and must find the same sentence again. Cite the wrong page and Share stays locked.</p></div></article>
+</section>` : "";
   return layout(`${hero}
-<form id="paste" class="paste-form" method="post" action="/cases" data-demo="app-ready">
-  <h${hero ? 2 : 1}>Check an investment pitch</h${hero ? 2 : 1}>
-  ${error ? `<p role="alert">${escape(error)}</p>` : ""}
-  <label for="message">${copy.pitch}</label>
-  <textarea id="message" name="message" rows="5" required maxlength="8000"></textarea>
-  <button class="button primary" type="submit" aria-label="${copy.check}"><span aria-hidden="true">[</span> Check <span aria-hidden="true">→ ]</span></button>
-</form>`, { mode: "landing" });
+<section class="paste-wrap" id="paste">
+  ${pixel("eye", "paste-icon")}
+  <form class="paste-form" method="post" action="/cases" data-demo="app-ready">
+    <h${hero ? 2 : 1}>Check an investment pitch</h${hero ? 2 : 1}>
+    ${error ? `<p role="alert">${escape(error)}</p>` : ""}
+    <label for="message" class="mono">${copy.pitch}</label>
+    <textarea id="message" name="message" rows="5" required maxlength="8000" placeholder="Paste the message you were sent, with the company's link"></textarea>
+    <div class="paste-row"><span class="mono">Kane reads the site live · about 3 minutes</span><button class="btn primary" type="submit" aria-label="${copy.check}">Check <span aria-hidden="true">→</span></button></div>
+  </form>
+</section>`, { mode: "landing" });
 }
 
 export function errorPage(status) {
@@ -126,50 +173,39 @@ function ticker(steps = []) {
   </div>`;
 }
 
-function liveCapture(c) {
-  const steps = c.kaneProgress?.filter(Boolean) ?? [];
-  const [verb, ...detail] = steps.at(-1)?.split(": ") ?? [];
-  const action = detail.length ? verb : c.stage === "assessing" ? "Compare" : steps.length ? "Read" : "Wait";
-  const remark = detail.length ? detail.join(": ") : steps.at(-1) ?? copy[c.stage];
-  return `<div class="reading-idle" aria-hidden="true">
-    <canvas data-idle></canvas>
-    <div class="site-wireframe">
-      <div class="wireframe-bar"><span>[ o o o ]</span><span>=== === ===</span></div>
-      <div class="wireframe-nav"><span>== == ====</span><span>=== === ==</span></div>
-      <div class="wireframe-body">
-        <p class="wireframe-step" data-active-step>STEP ${String(steps.length).padStart(2, "0")}</p>
-        <p class="wireframe-action" data-active-action>&gt; ${escape(action.toUpperCase())}</p>
-        <p class="wireframe-remark" data-active-remark>${escape(remark)}</p>
-      </div>
-      <div class="wireframe-row"><span>==== ======== ==== ======</span><span>[+]</span></div>
-      <div class="wireframe-row"><span>====== ===== ==== =========</span><span>[+]</span></div>
-    </div>
-  </div>`;
-}
+const STAGE_ICON = { extracting: "eye", "kane-reading": "term", assessing: "camera", ready: "camera" };
 
 export function reading(c, lead, bounds) {
   const complete = c.stage === "ready";
   const title = complete ? "Kane read the site." : c.stage === "kane-reading" ? "Kane is reading the site." : copy[c.stage];
   const source = lead && (c.wrongPage?.claim === lead.claim ? c.wrongPage.originalUrl : lead.sourceUrl);
+  const claims = c.sentences ?? c.draft?.claims?.map((claim, i) => ({ claim: i + 1, text: claim.text ?? claim.draft })) ?? [];
+  const status = (sentence) => complete ? (sentence.bound ? "Captured" : "Not found") : c.stage === "assessing" ? "Matching" : "Reading…";
   return layout(`<section class="reading-page"${complete ? "" : ` data-live-case="${c.id}" data-poll="read" data-stage="${c.stage}"`}>
-    <header class="reading-heading">
+    <header class="page-head">
+      <p class="mono">${c.site ? escape(c.site.defanged ?? defang(c.site.url)) : "Clause"}</p>
       <h1>${title}</h1>
-      ${c.site ? `<p>${escape(c.site.defanged ?? defang(c.site.url))}</p>` : ""}
     </header>
-    <div class="reading-grid">
-      ${lead ? `<figure class="reading-capture" data-scan${bounds ? ` data-bounds="${escape(JSON.stringify(bounds))}"` : ""}>
-        <img src="${shotUrl(c, lead)}" alt="${copy.shot}">
-        <canvas aria-hidden="true"></canvas>
-        <span class="scan-guide" aria-hidden="true"></span>
-        <span class="scan-brackets" aria-hidden="true"></span>
-      </figure>` : complete ? "" : liveCapture(c)}
-      <div class="reading-detail">
-        ${lead ? `<blockquote>“${escape(readingQuote(lead.quote))}”</blockquote>
-          <a class="capture-link" href="${shotUrl(c, lead)}" target="_blank" rel="noopener">${bounds ? "Open full capture" : "Full capture · quote position unavailable"} <span aria-hidden="true">↗</span></a>`
-          : complete ? `<p>${c.sentences?.length ? NOT_FOUND : copy.empty}</p>` : ""}
-        ${source ? `<p class="reading-source">${escape(defang(source))}</p>` : ""}
-        ${complete ? `<a class="button primary" href="/case/${c.id}"><span aria-hidden="true">[</span> Read the report <span aria-hidden="true">→ ]</span></a>`
-          : `<h2 class="reading-steps-heading">Live Kane steps</h2>${ticker(c.kaneProgress)}`}
+    <div class="window app">
+      <div class="chrome"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="addr mono">clause.app/case/${escape(c.id.slice(0, 8))}</span></div>
+      <div class="panes">
+        <div class="pane left">
+          ${bubble(c.message ?? "")}
+          ${claims.length ? `<ul class="claims">${claims.map((sentence) => `<li class="${complete && sentence.bound ? "got" : ""}"><span>${escape(sentence.text)}</span><b class="mono">${status(sentence)}</b></li>`).join("")}</ul>` : ""}
+          ${lead ? `<div class="link-quote"><blockquote>“${escape(readingQuote(lead.quote))}”</blockquote>${source ? `<p class="mono reading-source">${escape(defang(source))}${c.kane?.runId ? ` · run ${escape(c.kane.runId.slice(0, 8))}` : ""}</p>` : ""}</div>`
+            : complete ? `<p class="none">${c.sentences?.length ? NOT_FOUND : copy.empty}</p>` : ""}
+          ${complete ? `<a class="btn primary" href="/case/${c.id}">Read the report <span aria-hidden="true">→</span></a>` : ""}
+        </div>
+        <div class="pane right">
+          <div class="stage-head"><span class="badge mono">Kane CLI${c.kane?.runId ? ` · run ${escape(c.kane.runId.slice(0, 8))}` : " · live"}</span></div>
+          ${lead ? `<figure class="capture shown" data-resolve${bounds ? ` data-bounds="${escape(JSON.stringify(bounds))}"` : ""}>
+              <span class="cap-label mono">Kane capture</span>
+              <img src="${shotUrl(c, lead)}" alt="${copy.shot}">
+              <a class="mono cap-open" href="${shotUrl(c, lead)}" target="_blank" rel="noopener">${bounds ? "Open full capture" : "Full capture · quote position unavailable"} ↗</a>
+            </figure>`
+            : `<div class="stage">${pixel(STAGE_ICON[c.stage] ?? "term", "stage-icon")}</div>`}
+          ${complete ? "" : `<h2 class="mono steps-title">Live Kane steps</h2>${ticker(c.kaneProgress)}`}
+        </div>
       </div>
     </div>
   </section>`, { mode: "reading", refresh: !complete });
@@ -178,25 +214,24 @@ export function reading(c, lead, bounds) {
 function action(c, name, label, { extra = "", disabled = false, primary = false, quiet = false, visible = label } = {}) {
   return `<form method="post" class="${name}-form" action="/case/${c.id}/${name}">${extra}
     <button class="${quiet ? "text-button" : `button${primary ? " primary" : ""}`}" aria-label="${escape(label)}"${disabled ? " disabled" : ""}>
-      ${quiet ? escape(visible) : `<span aria-hidden="true">[</span> ${escape(visible)} <span aria-hidden="true">${disabled ? "]" : "→ ]"}</span>`}
+      ${quiet ? escape(visible) : `${escape(visible)}${disabled ? "" : ' <span aria-hidden="true">→</span>'}`}
     </button>
   </form>`;
 }
 
 function reportHeading(c) {
-  const labels = c.sentences.filter(({ verdict }) => verdict === "corrected").flatMap(({ text }) => {
-    const claim = text.trim().replace(/[.!?]+$/u, "");
-    const descriptor = /^(?:.+\b(?:am|is|are|was|were|be)\s+)?([\p{L}][\p{L}-]{1,10})$/iu.exec(claim)?.[1];
-    return descriptor ? [`Not ${descriptor.toLowerCase()}.`] : [];
-  });
-  const distinct = [...new Set(labels)].slice(0, 2);
-  if (distinct.length) return distinct;
-  return c.sentences.some(({ verdict }) => verdict === "corrected") ? ["The pitch", "falls short."] : [copy.report];
+  const corrected = c.sentences.filter(({ verdict }) => verdict === "corrected");
+  if (corrected.length) {
+    const faq = corrected.every(({ sourceUrl }) => /faq/i.test(sourceUrl ?? ""));
+    return { plain: "The pitch says one thing.", blue: faq ? "Their own FAQ disagrees." : "Their own site disagrees." };
+  }
+  return { plain: copy.report, blue: c.sentences.length ? "Kane couldn't confirm it." : "" };
 }
 
 function shotCrop(c, sentence, bounds) {
   const url = shotUrl(c, sentence);
   let geometry = "";
+  let mark = "";
   if (bounds) {
     const { x, y, right, bottom, width, height } = bounds;
     const left = Math.max(0, x - 30);
@@ -204,14 +239,14 @@ function shotCrop(c, sentence, bounds) {
     const cropWidth = Math.min(width, right + 39) - left;
     const cropHeight = Math.min(height, bottom + 30) - top;
     geometry = ` style="--crop-ratio:${cropWidth}/${cropHeight};--shot-w:${width / cropWidth * 100}%;--shot-x:${left / cropWidth * -100}%;--shot-y:${top / cropHeight * -100}%;"`;
+    const pad = 8;
+    mark = `<span class="cap-box" style="left:${(x - left - pad) / cropWidth * 100}%;top:${(y - top - pad) / cropHeight * 100}%;width:${(right - x + pad * 2) / cropWidth * 100}%;height:${(bottom - y + pad * 2) / cropHeight * 100}%"></span>`;
   }
   return `<figure class="evidence-frame" data-demo="kane-shot">
     <a href="${url}" target="_blank" rel="noopener" class="shot-link" aria-label="Open full Kane capture in a new tab">
-      <span class="bracket-edge" aria-hidden="true"><span>[</span><span>]</span></span>
-      <span class="shot-window${bounds ? " crop" : ""}"${geometry}><img src="${url}" alt="${copy.shot}"></span>
-      <span class="bracket-edge" aria-hidden="true"><span>[</span><span>]</span></span>
+      <span class="shot-window${bounds ? " crop" : ""}"${geometry}><img src="${url}" alt="${copy.shot}">${mark}</span>
     </a>
-    <figcaption>${bounds ? "Open full capture" : "Full capture · quote position unavailable"} <span aria-hidden="true">↗</span></figcaption>
+    <figcaption class="mono">${bounds ? "Open full capture" : "Full capture · quote position unavailable"} <span aria-hidden="true">↗</span></figcaption>
   </figure>`;
 }
 
@@ -227,23 +262,31 @@ function claimRow(c, sentence, { shared, offerWrongPage, bounds }) {
   const readableTime = capturedAt?.replace("T", " ").replace(/(?:\.\d+)?Z$/, " UTC");
   const excerpt = bound && contradicted ? readingQuote(quote) : "";
   const proof = bound ? `
-    <blockquote data-demo="kane-quote">${excerpt ? `<mark>${escape(excerpt)}</mark>${escape(quote.slice(excerpt.length))}` : escape(quote)}</blockquote>
-    <p class="evidence-source">${originalSource ? "Re-check page" : copy.citation} <a data-demo="kane-source" href="${escape(sourceUrl)}" rel="noreferrer">${escape(pageLabel(sourceUrl))}</a></p>
-    ${originalSource ? `<p class="evidence-source">Original capture ${escape(pageLabel(originalSource))}</p>` : ""}
-    ${shotCrop(c, sentence, bounds.get(claim))}
-    <div class="capture-meta">
-      ${capturedAt ? `<p>Captured <time datetime="${escape(capturedAt)}">${escape(readableTime)}</time></p>` : ""}
-      ${c.kane?.runId ? `<p>Run <code>${escape(c.kane.runId)}</code></p>` : ""}
-    </div>` : `<p class="no-evidence">${NOT_FOUND}</p>`;
-  return `<li class="claim${flagged ? " flagged" : ""}" data-demo="claim-row" data-claim="${claim}">
-    <p class="claim-pitch">${pitch}</p>
-    ${flagged ? `<div class="claim-alert" data-demo="claim-recheck" data-verdict="missing">
-      <strong>[ NOT ON THE CITED PAGE ]</strong>
-      ${result.visitedUrl && result.visitedUrl !== sourceUrl && result.visitedUrl !== originalSource ? `<p>Kane visited ${escape(pageLabel(result.visitedUrl))} during the re-check.</p>` : ""}
-    </div>` : ""}
-    <div data-demo="final-claim" data-verdict="${escape(verdict)}"${bound ? ` data-evidence="${escape(evidence)}"` : ""}>${proof}</div>
-    ${!shared && offerWrongPage && canPointAtHomepage(c, sentence)
-      ? action(c, "wrong-page", copy.point, { extra: `<input type="hidden" name="claim" value="${claim}">`, quiet: true }) : ""}
+    <div class="col quote-col">
+      <p class="col-label mono">The site says</p>
+      <blockquote data-demo="kane-quote">${excerpt ? `<mark>${escape(excerpt)}</mark>${escape(quote.slice(excerpt.length))}` : escape(quote)}</blockquote>
+      <p class="evidence-source mono">${originalSource ? "Re-check page" : copy.citation} <a data-demo="kane-source" href="${escape(sourceUrl)}" rel="noreferrer">${escape(pageLabel(sourceUrl))}</a></p>
+      ${originalSource ? `<p class="evidence-source mono">Original capture ${escape(pageLabel(originalSource))}</p>` : ""}
+    </div>
+    <div class="col shot-col">
+      ${shotCrop(c, sentence, bounds.get(claim))}
+      <div class="capture-meta mono">
+        ${capturedAt ? `<p>Captured <time datetime="${escape(capturedAt)}">${escape(readableTime)}</time></p>` : ""}
+        ${c.kane?.runId ? `<p>Run ${escape(c.kane.runId.slice(0, 8))}</p>` : ""}
+      </div>
+    </div>` : `<div class="col quote-col"><p class="col-label mono">The site says</p><p class="no-evidence">${NOT_FOUND}</p></div><div class="col shot-col empty" aria-hidden="true">${pixel("lens", "dim")}</div>`;
+  return `<li class="claim${flagged ? " flagged" : ""}${contradicted ? " corrected" : ""}" data-demo="claim-row" data-claim="${claim}">
+    <div class="col claim-col">
+      <span class="num mono">${String(claim).padStart(2, "0")}</span>
+      ${pixel(claimIcon(text), "claim-icon")}
+      <p class="col-label mono">The pitch said</p>
+      <p class="claim-pitch">${pitch}</p>
+      ${flagged ? `<div class="claim-alert" data-demo="claim-recheck" data-verdict="missing">
+        <strong class="mono">Not on the cited page</strong>
+        ${result.visitedUrl && result.visitedUrl !== sourceUrl && result.visitedUrl !== originalSource ? `<p>Kane visited ${escape(pageLabel(result.visitedUrl))} during the re-check.</p>` : ""}
+      </div>` : ""}
+    </div>
+    <div class="final" data-demo="final-claim" data-verdict="${escape(verdict)}"${bound ? ` data-evidence="${escape(evidence)}"` : ""}>${proof}</div>
   </li>`;
 }
 
@@ -259,54 +302,56 @@ function recheckPanel(c, { shared, offerRecheck }, hasEvidence) {
     : !hasEvidence ? copy.noQuotes
     : running ? "Share unlocks after Kane finds every quote again."
     : "Share unlocks after a successful re-check.";
-  return `<aside class="recheck-panel"${running ? ` data-live-case="${c.id}" data-poll="recheck"` : ""}>
-    <h2${recheck ? ` role="status" data-demo="kane-recheck" data-verdict="${recheckVerdict[recheck.status] ?? recheck.status}"` : ""}>${status}${recheck?.status === "failed" ? ' <span aria-hidden="true">· Share locked</span>' : ""}</h2>
-    <p class="recheck-detail">${detail}</p>
-    ${running ? ticker(recheck.progress) : ""}
-    ${!shared && offerRecheck && canRecheck(c) ? action(c, "recheck", copy.recheck, { primary: true }) : ""}
-    ${!shared ? action(c, "share", copy.share, { disabled: !shareable, primary: shareable, visible: shareable ? "Share report" : "Share locked" }) : ""}
-    ${c.kane?.runId || recheck?.runId ? `<dl class="run-list">
-      ${c.kane?.runId ? `<div><dt>${copy.run}</dt><dd><code data-demo="kane-run">${escape(c.kane.runId)}</code></dd></div>` : ""}
-      ${recheck?.runId ? `<div><dt>${copy.freshRun}</dt><dd><code data-demo="kane-recheck-run">${escape(recheck.runId)}</code></dd></div>` : ""}
-    </dl>` : ""}
-    ${c.wrongPage ? `<a href="/case/${escape(c.wrongPage.from)}">Return to original report <span aria-hidden="true">↗</span></a>` : ""}
+  return `<aside class="recheck-panel${shareable ? " open" : ""}"${running ? ` data-live-case="${c.id}" data-poll="recheck"` : ""}>
+    ${pixel(shareable ? "lock" : running ? "term" : "locked", "lock-icon")}
+    <div class="recheck-copy">
+      <h2${recheck ? ` role="status" data-demo="kane-recheck" data-verdict="${recheckVerdict[recheck.status] ?? recheck.status}"` : ""}>${status}${recheck?.status === "failed" ? ' <span aria-hidden="true">· Share locked</span>' : ""}</h2>
+      <p class="recheck-detail">${detail}</p>
+      ${running ? ticker(recheck.progress) : ""}
+      ${c.kane?.runId || recheck?.runId ? `<dl class="run-list mono">
+        ${c.kane?.runId ? `<div><dt>${copy.run}</dt><dd><code data-demo="kane-run">${escape(c.kane.runId)}</code></dd></div>` : ""}
+        ${recheck?.runId ? `<div><dt>${copy.freshRun}</dt><dd><code data-demo="kane-recheck-run">${escape(recheck.runId)}</code></dd></div>` : ""}
+      </dl>` : ""}
+    </div>
+    <div class="recheck-actions">
+      ${!shared && offerRecheck && canRecheck(c) ? action(c, "recheck", copy.recheck, { primary: true }) : ""}
+      ${!shared ? action(c, "share", copy.share, { disabled: !shareable, primary: shareable, visible: shareable ? "Share report" : "Share locked" }) : ""}
+    </div>
+    ${c.wrongPage ? `<a class="mono back" href="/case/${escape(c.wrongPage.from)}">Return to original report ↗</a>` : ""}
   </aside>`;
 }
 
 export function report(c, { shared = false, offerRecheck = true, offerWrongPage = true, bounds = new Map() } = {}) {
-  if (c.format !== 1 || c.stage === "failed") return layout(`<div class="error-page"><h1>${copy.report}</h1><p role="status">${INCOMPLETE}</p><a href="/">${copy.newCheck}</a></div>`);
+  if (c.format !== 1 || c.stage === "failed") return layout(`<div class="error-page"><h1>${copy.report}</h1><p role="status">${INCOMPLETE}</p><a class="btn ghost" href="/">${copy.newCheck}</a></div>`);
   if (c.stage !== "ready") return reading(c);
 
-  const lines = reportHeading(c);
-  const longest = Math.max(...lines.map((line) => line.length));
-  const [lead, ...remaining] = [...c.sentences].sort((a, b) => a.claim - b.claim);
+  const heading = reportHeading(c);
+  const rows = [...c.sentences].sort((a, b) => a.claim - b.claim);
   const notice = c.regulator;
   const claimOptions = { shared, offerWrongPage, bounds };
   return layout(`<article data-demo="report" class="report-page">
     <header class="report-heading">
-      <h1 class="glyph-title report-title" style="--headline-chars:${longest}">${lines.map((line) => `<span>${escape(line)}</span>`).join(" ")}</h1>
-      <div class="report-context">
+      <div class="report-context mono">
         ${notice ? `<p data-demo="supported-demo">${copy.supported}</p>` : c.site?.defanged ? `<p>${escape(c.site.defanged)}</p>` : ""}
         ${shared ? `<p>${copy.shared}</p>` : ""}
         ${c.replay || c.recheck?.replay ? `<p data-demo="replay">${copy.replay}</p>` : ""}
         ${c.wrongPage ? `<p class="wrong-page-label" data-demo="wrong-page">${copy.wrongPage}${c.recheck?.status === "failed" ? " · Share locked" : ""}</p>` : ""}
       </div>
+      <h1><span>${escape(heading.plain)}</span> <em>${escape(heading.blue)}</em></h1>
     </header>
-    <div class="report-flow">
-      ${lead ? `<ol class="claim-list lead-claim">${claimRow(c, lead, { ...claimOptions, offerWrongPage: false })}</ol>` : `<p class="lead-claim">${copy.empty}</p>`}
-      ${recheckPanel(c, claimOptions, c.sentences.some(({ bound }) => bound))}
-      ${remaining.length ? `<ol class="claim-list remaining-claims" start="2">${remaining.map((sentence) => claimRow(c, sentence, claimOptions)).join("")}</ol>` : ""}
-      ${notice ? `<section class="regulator" data-demo="regulator">
-        <h2>${copy.regulator}</h2>
-        <blockquote>${escape(notice.quote)}</blockquote>
-        <p><span data-demo="regulator-name">${escape(notice.name)}</span> · <time datetime="${escape(notice.date)}">${escape(notice.date)}</time></p>
-        <a href="${escape(notice.url)}" rel="noreferrer">${copy.noticeLink} <span aria-hidden="true">↗</span></a>
-      </section>` : ""}
-    </div>
-    <footer class="report-end">
-      ${lead && !shared && offerWrongPage && canPointAtHomepage(c, lead)
-        ? action(c, "wrong-page", copy.point, { extra: `<input type="hidden" name="claim" value="${lead.claim}">`, quiet: true, visible: "Test the lead claim against the homepage" }) : ""}
-      <a href="/">${copy.newCheck} <span aria-hidden="true">↗</span></a>
+    ${c.message ? `<div class="report-pitch">${bubble(c.message)}</div>` : ""}
+    ${rows.length ? `<ol class="claim-list">${rows.map((sentence) => claimRow(c, sentence, claimOptions)).join("")}</ol>` : `<p class="lead-claim">${copy.empty}</p>`}
+    ${recheckPanel(c, { shared, offerRecheck }, c.sentences.some(({ bound }) => bound))}
+    ${notice ? `<section class="regulator" data-demo="regulator">
+      <h2 class="mono">${copy.regulator}</h2>
+      <blockquote>${escape(notice.quote)}</blockquote>
+      <p class="mono"><span data-demo="regulator-name">${escape(notice.name)}</span> · <time datetime="${escape(notice.date)}">${escape(notice.date)}</time></p>
+      <a class="mono" href="${escape(notice.url)}" rel="noreferrer">${copy.noticeLink} ↗</a>
+    </section>` : ""}
+    <footer class="report-end mono">
+      ${rows[0] && !shared && offerWrongPage && canPointAtHomepage(c, rows[0])
+        ? action(c, "wrong-page", copy.point, { extra: `<input type="hidden" name="claim" value="${rows[0].claim}">`, quiet: true, visible: "Test the lead claim against the homepage" }) : ""}
+      <a href="/">${copy.newCheck} ↗</a>
     </footer>
   </article>`, { refresh: c.recheck?.status === "running" });
 }

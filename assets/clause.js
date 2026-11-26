@@ -117,12 +117,12 @@ const idle = document.querySelector("[data-idle]");
 const live = document.querySelector("[data-live-case]");
 let tick = 0;
 function drawRain() {
-  drawField(field, tick);
+  if (field) drawField(field, tick);
   if (idle) drawField(idle, tick, true);
 }
 
 const rainObserver = new ResizeObserver(drawRain);
-rainObserver.observe(field);
+if (field) rainObserver.observe(field);
 if (idle) rainObserver.observe(idle);
 if (live) {
   let rainTimer;

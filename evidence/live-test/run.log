@@ -1,0 +1,10 @@
+[5s] case http://localhost:3000/case/6ac927cc38434a4f?view=reading
+[36s] reading… [>] | Clause | Kane is reading the site.
+[67s] reading… [>] | Clause | Kane is reading the site.
+[97s] reading… [>] | Clause | Kane is reading the site.
+[127s] reading… [>] | Clause | Kane is reading the site.
+[157s] reading… [>] | Clause | Kane is reading the site.
+[187s] reading… [>] | Clause | Kane is reading the site.
+[203s] read finished
+[204s] report http://localhost:3000/case/6ac927cc38434a4f
+[205s] done http://localhost:3000/case/6ac927cc38434a4f
